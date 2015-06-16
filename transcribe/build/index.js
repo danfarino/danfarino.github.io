@@ -112,7 +112,10 @@
 				}).toList());
 			} catch (e) {
 				console.error('error loading saved chunks for ' + file.sha1, e);
+				Chunks.reset();
 			}
+		} else {
+			Chunks.reset();
 		}
 	}).run('load saved chunks');
 	
@@ -160,9 +163,16 @@
 	});
 	
 	var Chunks = (function () {
-		var lastId = 0;
-		var allChunks = Immutable.List.of(createChunk({ time: 0 }));
 		var updated = new Rx.Subject();
+	
+		var lastId = 0;
+		var allChunks = null;
+	
+		resetChunks();
+	
+		function resetChunks() {
+			setChunks(Immutable.List.of(createChunk({ time: 0 })));
+		}
 	
 		function createChunk(args) {
 			args = args || {};
@@ -226,6 +236,8 @@
 			set: setChunks,
 	
 			create: createChunk,
+	
+			reset: resetChunks,
 	
 			save: function save(chunk) {
 				setChunks(updateChunk(allChunks, chunk));
@@ -333,7 +345,7 @@
 				React.createElement(
 					'td',
 					null,
-					React.createElement('input', { tabIndex: '-1', type: 'checkbox', checked: chunk.done, onChange: function (e) {
+					React.createElement('input', { className: 'mousetrap', tabIndex: '-1', type: 'checkbox', checked: chunk.done, onChange: function (e) {
 							return Chunks.save(chunk.set('done', e.target.checked));
 						} })
 				)
@@ -690,9 +702,43 @@
 	
 		mixins: [ReactUtils.RxMixin],
 	
+		getInitialState: function getInitialState() {
+			return {
+				loading: null
+			};
+		},
+	
 		componentWillMount: function componentWillMount() {
+			var _this7 = this;
+	
 			this.observeIntoState({
 				file: CurrentFile
+			});
+	
+			window.addEventListener('dragover', function (e) {
+				return e.preventDefault();
+			});
+	
+			window.addEventListener('drop', function (e) {
+				e.stopPropagation();
+				e.preventDefault();
+	
+				if (e.dataTransfer.files.length) {
+					(function () {
+						var file = e.dataTransfer.files[0];
+						_this7.setState({ loading: file.name });
+	
+						var reader = new FileReader();
+						reader.onload = function () {
+							var sha1 = Sha1(reader.result);
+							var objectUrl = URL.createObjectURL(file);
+							getPlayer().src = objectUrl;
+							CurrentFile.onNext(new CurrentFileInfo({ name: file.name, sha1: sha1 }));
+							_this7.setState({ loading: null });
+						};
+						reader.readAsArrayBuffer(file);
+					})();
+				}
 			});
 		},
 	
@@ -700,6 +746,13 @@
 			return React.createElement(
 				'div',
 				null,
+				this.state.loading && React.createElement(
+					'div',
+					{ className: 'loading' },
+					'Loading ',
+					this.state.loading,
+					'...'
+				),
 				React.createElement(PlayerView, null),
 				this.state.file && React.createElement(ClipboardButton, null),
 				React.createElement(CurrentFileInfoView, { file: this.state.file }),
@@ -715,29 +768,6 @@
 	});
 	
 	React.render(React.createElement(MainUI, null), document.getElementById('react-mount'));
-	
-	window.addEventListener('dragover', function (e) {
-		return e.preventDefault();
-	});
-	
-	window.addEventListener('drop', function (e) {
-		e.stopPropagation();
-		e.preventDefault();
-	
-		if (e.dataTransfer.files.length) {
-			(function () {
-				var file = e.dataTransfer.files[0];
-				var reader = new FileReader();
-				reader.onload = function () {
-					var sha1 = Sha1(reader.result);
-					var objectUrl = URL.createObjectURL(file);
-					getPlayer().src = objectUrl;
-					CurrentFile.onNext(new CurrentFileInfo({ name: file.name, sha1: sha1 }));
-				};
-				reader.readAsArrayBuffer(file);
-			})();
-		}
-	});
 
 /***/ },
 /* 1 */
@@ -22437,7 +22467,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(/*! ./../~/css-loader/lib/css-base.js */ 5)();
-	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .timeCol {\n    white-space: no-wrap;\n    padding-right: 1em;\n    vertical-align: top;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n  .chunks textarea.editor {\n    font-family: 'Source Sans Pro';\n    width: 100%;\n    box-sizing: border-box;\n    min-height: 2em;\n    border: 0px;\n    font-size: 1em;\n    margin: 0px;\n    background-color: transparent;\n    resize: none;\n    outline: none;\n    padding: 0px; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em; }\n", ""]);
+	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .timeCol {\n    white-space: no-wrap;\n    padding-right: 1em;\n    vertical-align: top;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n  .chunks textarea.editor {\n    font-family: 'Source Sans Pro';\n    width: 100%;\n    box-sizing: border-box;\n    min-height: 2em;\n    border: 0px;\n    font-size: 1em;\n    margin: 0px;\n    background-color: transparent;\n    resize: none;\n    outline: none;\n    padding: 0px; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em; }\n\n.loading {\n  background-color: rgba(255, 255, 255, 0.85);\n  z-index: 100000;\n  position: fixed;\n  top: 0px;\n  left: 0px;\n  right: 0px;\n  bottom: 0px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 4em; }\n", ""]);
 
 /***/ },
 /* 5 */
