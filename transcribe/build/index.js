@@ -155,7 +155,8 @@
 	var Chunk = Immutable.Record({
 		id: null,
 		time: 0,
-		text: ''
+		text: '',
+		done: false
 	});
 	
 	var Chunks = (function () {
@@ -306,10 +307,12 @@
 	
 		render: function render() {
 			var chunk = this.props.chunk;
+			var currentClass = this.props.current ? 'current' : '';
+			var doneClass = chunk.done ? 'done' : '';
 	
 			return React.createElement(
 				'tr',
-				{ className: 'chunk ' + (this.props.current ? 'current' : '') },
+				{ className: 'chunk ' + currentClass + ' ' + doneClass },
 				React.createElement(
 					'td',
 					{ className: 'timeCol' },
@@ -326,6 +329,13 @@
 							return Chunks.save(chunk.set('text', e.target.value));
 						}
 					})
+				),
+				React.createElement(
+					'td',
+					null,
+					React.createElement('input', { type: 'checkbox', checked: chunk.done, onChange: function (e) {
+							return Chunks.save(chunk.set('done', e.target.checked));
+						} })
 				)
 			);
 		},
@@ -522,19 +532,23 @@
 	
 			keyboardCommand('ctrl+[', 'Move current chunk back ½ second', function () {
 				var currentChunk = getCurrentChunk();
-				if (currentChunk.time > 0) {
+				var prevChunk = Chunks.getChunkBefore(currentChunk.time);
+				if (prevChunk) {
 					var newTime = currentChunk.time - 0.5;
-					Chunks.move(currentChunk, newTime);
-					setCurrentTime(newTime);
+					if (newTime > prevChunk.time) {
+						setCurrentTime(newTime);
+						Chunks.move(currentChunk, newTime);
+					}
 				}
 			});
 	
 			keyboardCommand('ctrl+]', 'Move current chunk forward ½ second', function () {
 				var currentChunk = getCurrentChunk();
-				if (currentChunk.time > 0) {
-					var newTime = currentChunk.time + 0.5;
-					Chunks.move(currentChunk, newTime);
+				var nextChunk = Chunks.getChunkAfter(currentChunk.time);
+				var newTime = currentChunk.time + 0.5;
+				if (!nextChunk || nextChunk.time > newTime) {
 					setCurrentTime(newTime);
+					Chunks.move(currentChunk, newTime);
 				}
 			});
 	
@@ -22423,7 +22437,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(/*! ./../~/css-loader/lib/css-base.js */ 5)();
-	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .timeCol {\n    white-space: no-wrap;\n    padding-right: 1em;\n    vertical-align: top;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n  .chunks textarea.editor {\n    font-family: 'Source Sans Pro';\n    width: 100%;\n    box-sizing: border-box;\n    min-height: 2em;\n    border: 0px;\n    font-size: 1em;\n    margin: 0px;\n    background-color: transparent;\n    resize: none;\n    outline: none;\n    padding: 0px; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em; }\n", ""]);
+	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .timeCol {\n    white-space: no-wrap;\n    padding-right: 1em;\n    vertical-align: top;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n  .chunks textarea.editor {\n    font-family: 'Source Sans Pro';\n    width: 100%;\n    box-sizing: border-box;\n    min-height: 2em;\n    border: 0px;\n    font-size: 1em;\n    margin: 0px;\n    background-color: transparent;\n    resize: none;\n    outline: none;\n    padding: 0px; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em; }\n", ""]);
 
 /***/ },
 /* 5 */
