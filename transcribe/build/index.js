@@ -100,14 +100,18 @@
 		sha1: null
 	});
 	
+	function localStorageKeyForFile(file) {
+		return 'transcription_' + file.sha1;
+	}
+	
 	CurrentFile.filter(function (o) {
 		return o;
 	})['do'](function (file) {
-		var saved = localStorage['chunks_' + file.sha1];
+		var saved = localStorage[localStorageKeyForFile(file)];
 		if (saved) {
 			try {
 				var parsed = JSON.parse(saved);
-				Chunks.set(Immutable.Seq(parsed).map(function (c) {
+				Chunks.set(Immutable.Seq(parsed.chunks).map(function (c) {
 					return Chunks.create(c);
 				}).toList());
 			} catch (e) {
@@ -302,7 +306,7 @@
 		return o;
 	}).flatMapLatest(function (file) {
 		return Chunks.all.skip(1).debounce(1000)['do'](function (chunks) {
-			return localStorage['chunks_' + file.sha1] = JSON.stringify(chunks);
+			return localStorage[localStorageKeyForFile(file)] = JSON.stringify({ chunks: chunks });
 		});
 	}).run('auto save');
 	
@@ -34014,7 +34018,7 @@
 	
 	    this.disposables.add(Rx.Observable.combineLatestDictionary(seq.map(function (observable) {
 	      return observable.startWith(null);
-	    })).tapDump('setstate')['do'](this.setState.bind(this)).run('importState ' + seq.keySeq().join(', ')));
+	    }))['do'](this.setState.bind(this)).run('importState ' + seq.keySeq().join(', ')));
 	  },
 	
 	  componentDidMount: function componentDidMount() {
