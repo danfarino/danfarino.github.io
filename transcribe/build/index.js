@@ -141,7 +141,7 @@
 	assertion: this is the ONLY place that sets the current player's .currentTime property!
 	*/
 	function setCurrentTime(time) {
-		getPlayer().currentTime = Math.max(time, 0);
+		getPlayer().currentTime = +Math.max(time, 0).toFixed(2);
 	}
 	
 	function getCurrentChunk() {
@@ -276,6 +276,7 @@
 			move: function move(chunk, newTime) {
 				if (chunk.time > 0) {
 					// first chunk can't move
+					newTime = +newTime.toFixed(2);
 					var newChunk = chunk.set('time', newTime);
 					setChunks(withoutChunk(updateChunk(allChunks, newChunk), chunk.time));
 				}
@@ -292,7 +293,7 @@
 				}).map(function (inputs) {
 					return chunkForTime(inputs.chunks, inputs.currentTime);
 				}).distinctUntilChangedImmutable();
-			}).share()
+			})
 		};
 	})();
 	
@@ -300,10 +301,7 @@
 		return o;
 	}).flatMapLatest(function (file) {
 		return Chunks.all.skip(1).debounce(1000)['do'](function (chunks) {
-			var newChunks = chunks.map(function (chunk) {
-				return chunk.set('time', +chunk.time.toFixed(2));
-			});
-			localStorage['chunks_' + file.sha1] = JSON.stringify(newChunks);
+			return localStorage['chunks_' + file.sha1] = JSON.stringify(chunks);
 		});
 	}).run('auto save');
 	
@@ -386,6 +384,8 @@
 	
 		render: function render() {
 			var _this2 = this;
+	
+			console.log(Immutable.fromJS(this.state).toJS());
 	
 			if (this.state && this.state.chunks) {
 				return React.createElement(
@@ -34013,7 +34013,7 @@
 	
 	    this.disposables.add(Rx.Observable.combineLatestDictionary(seq.map(function (observable) {
 	      return observable.startWith(null);
-	    }))['do'](this.setState.bind(this)).run('importState ' + seq.keySeq().join(', ')));
+	    })).tapDump('setstate')['do'](this.setState.bind(this)).run('importState ' + seq.keySeq().join(', ')));
 	  },
 	
 	  componentDidMount: function componentDidMount() {
