@@ -300,7 +300,10 @@
 		return o;
 	}).flatMapLatest(function (file) {
 		return Chunks.all.skip(1).debounce(1000)['do'](function (chunks) {
-			return localStorage['chunks_' + file.sha1] = JSON.stringify(chunks);
+			var newChunks = chunks.map(function (chunk) {
+				return chunk.set('time', +chunk.time.toFixed(2));
+			});
+			localStorage['chunks_' + file.sha1] = JSON.stringify(newChunks);
 		});
 	}).run('auto save');
 	
