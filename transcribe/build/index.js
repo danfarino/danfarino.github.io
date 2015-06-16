@@ -186,6 +186,7 @@
 			if (typeof args.time !== 'number') {
 				args.time = getCurrentTime();
 			}
+			args.time = +args.time.toFixed(2);
 			args.id = ++lastId;
 			return new Chunk(args);
 		}
