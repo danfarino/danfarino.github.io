@@ -333,7 +333,7 @@
 				React.createElement(
 					'td',
 					null,
-					React.createElement('input', { type: 'checkbox', checked: chunk.done, onChange: function (e) {
+					React.createElement('input', { tabIndex: '-1', type: 'checkbox', checked: chunk.done, onChange: function (e) {
 							return Chunks.save(chunk.set('done', e.target.checked));
 						} })
 				)
