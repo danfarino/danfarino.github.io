@@ -121,18 +121,25 @@
 	
 	var CurrentPlayerTime = Player.flatMapLatest(function (player) {
 		return player ? Rx.Observable.fromEvent(player, 'timeupdate').map(function () {
-			return player.currentTime;
-		}).startWith(player.currentTime) : Rx.Observable.never();
+			return getCurrentTime(player);
+		}).startWith(getCurrentTime(player)) : Rx.Observable.never();
 	}).shareValue(0).distinctUntilChanged();
 	
 	function getPlayer() {
 		return Player.value;
 	}
 	
-	function getCurrentTime() {
-		return getPlayer() ? +getPlayer().currentTime.toFixed(2) : 0;
+	/*
+	assertion: this is the ONLY place that reads the current player's .currentTime property!
+	*/
+	function getCurrentTime(player) {
+		player = player || getPlayer();
+		return player ? +player.currentTime.toFixed(2) : 0;
 	}
 	
+	/*
+	assertion: this is the ONLY place that sets the current player's .currentTime property!
+	*/
 	function setCurrentTime(time) {
 		getPlayer().currentTime = Math.max(time, 0);
 	}
@@ -183,6 +190,9 @@
 			return new Chunk(args);
 		}
 	
+		/*
+	 assertion: this is the ONLY place that assigns to allChunks!
+	 */
 		function setChunks(newChunks) {
 			allChunks = newChunks;
 			updated.onNext(newChunks);
@@ -265,9 +275,9 @@
 	
 			move: function move(chunk, newTime) {
 				if (chunk.time > 0) {
+					// first chunk can't move
 					var newChunk = chunk.set('time', newTime);
-					var newChunks = withoutChunk(updateChunk(allChunks, newChunk), chunk.time);
-					setChunks(newChunks);
+					setChunks(withoutChunk(updateChunk(allChunks, newChunk), chunk.time));
 				}
 			},
 	
@@ -297,7 +307,7 @@
 	var ChunkView = React.createClass({
 		displayName: 'ChunkView',
 	
-		mixins: [ReactUtils.RxMixin, React.addons.LinkedStateMixin],
+		mixins: [ReactUtils.RxMixin, ReactUtils.ImmutableRenderMixin, React.addons.LinkedStateMixin],
 	
 		componentWillMount: function componentWillMount(newProps) {
 			var _this = this;
@@ -362,7 +372,7 @@
 	var ChunksView = React.createClass({
 		displayName: 'ChunksView',
 	
-		mixins: [ReactUtils.RxMixin],
+		mixins: [ReactUtils.RxMixin, ReactUtils.ImmutableRenderMixin],
 	
 		componentWillMount: function componentWillMount() {
 			this.observeIntoState({
@@ -468,7 +478,7 @@
 			var _this4 = this;
 	
 			this.observeIntoState({
-				chunks: Chunks.all.map(function (chunks) {
+				chunks: CurrentFile.flatMapLatest(Chunks.all.map(function (chunks) {
 					var prevChunks = _this4.state && _this4.state.chunks || Immutable.List();
 					if (_this4.undoingTo === chunks) {
 						delete _this4.undoingTo;
@@ -476,7 +486,7 @@
 					} else {
 						return prevChunks.push(chunks);
 					}
-				})
+				}).startWith(Immutable.List()))
 			});
 	
 			globalUndo = this.undo;
