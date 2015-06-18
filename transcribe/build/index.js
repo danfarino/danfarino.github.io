@@ -675,17 +675,16 @@
 				var speakers = Speakers.value;
 				var chunk = getCurrentChunk();
 				var currentName = speakers.get(chunk.speaker);
-				var msg = 'Enter the name of the current speaker';
-				if (currentName) {
-					msg += '\n(currently “' + currentName + '”)';
-				}
-				msg += ':';
+	
 				var wasPlaying = isPlaying();
 				pause();
-				var newName = window.prompt(msg);
+	
+				var newName = window.prompt('Enter the name of the current speaker:', currentName || '');
+	
 				if (wasPlaying) {
 					play();
 				}
+	
 				if (newName !== null) {
 					Speakers.onNext(newName ? speakers.set(chunk.speaker, newName) : speakers['delete'](chunk.speaker));
 				}
