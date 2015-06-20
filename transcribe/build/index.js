@@ -317,12 +317,11 @@
 		componentWillMount: function componentWillMount(newProps) {
 			var _this = this;
 	
-			// this.run('handle being current',
-			// 	this.propObserver('current')
-			// 	.filter(b => b)
-			// 	.flatMap(this.observeRenderCompleted())
-			// 	.do(() => React.findDOMNode(this.refs.textarea).focus())
-			// );
+			this.run('handle being current', this.propObserver('current').filter(function (b) {
+				return b;
+			}).flatMap(this.observeRenderCompleted())['do'](function () {
+				return React.findDOMNode(_this.refs.textarea).focus();
+			}));
 	
 			this.run('auto size textarea', Rx.Observable.merge(this.propObserver('chunk').flatMap(this.observeRenderCompleted()), Rx.Observable.fromEvent(window, 'resize'))['do'](function () {
 				var textarea = React.findDOMNode(_this.refs.textarea);
