@@ -64,6 +64,8 @@
 	var DataCoreView = __webpack_require__(/*! data-core-view */ 43);
 	var CurrentFileInfoView = __webpack_require__(/*! current-file-info-view */ 44);
 	
+	// DataCore.logWrites = true;
+	
 	var CurrentFileInfo = Immutable.Record({
 		name: null,
 		sha1: null
@@ -34264,7 +34266,17 @@
 	    });
 	  };
 	
+	  self.logWrites = false;
+	
 	  function setPathValue(crackedPath, value) {
+	    if (self.logWrites) {
+	      var printable = value;
+	      if (Immutable.Iterable.isIterable(value)) {
+	        printable = value.toJS();
+	      }
+	      console.log(pathString(crackedPath), printable);
+	    }
+	
 	    if (crackedPath.size === 0) {
 	      throw 'Cannot set the root path';
 	    }
@@ -34282,6 +34294,7 @@
 	        return n + 1;
 	      });
 	      signalChange(crackedPath);
+	      signalChange(['data-core-revision']);
 	    }
 	  }
 	
@@ -34326,7 +34339,7 @@
 	    });
 	    pathProviders = pathProviders.push(pathProvider);
 	
-	    pathProvider.disposable.add(observable.startWith(null).subscribe(function (value) {
+	    pathProvider.disposable.add(observable.startWith(null).distinctUntilChangedImmutable().subscribe(function (value) {
 	      return setPathValue(crackedPath, value);
 	    }, function (err) {
 	      return console.error('DataCore provider for ' + path + ' onError:', err);
