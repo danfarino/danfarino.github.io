@@ -36,6 +36,9 @@
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/
+/******/ 	// __webpack_hash__
+/******/ 	__webpack_require__.h = "48435857e8f01bcd6fb1";
+/******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
@@ -49,8 +52,6 @@
 
 	'use strict';
 	
-	function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }
-	
 	__webpack_require__(/*! main-style */ 1);
 	__webpack_require__(/*! mousetrap */ 5);
 	
@@ -58,30 +59,61 @@
 	var Rx = __webpack_require__(/*! rx */ 11);
 	var React = __webpack_require__(/*! react */ 15);
 	var ReactUtils = __webpack_require__(/*! react-utils */ 17);
-	var Ω = __webpack_require__(/*! utils */ 19);
-	var Sha1 = __webpack_require__(/*! js-sha1 */ 20);
 	var DataCore = window.DataCore = __webpack_require__(/*! data-core */ 18);
-	var DataCoreView = __webpack_require__(/*! data-core-view */ 43);
-	var CurrentFileInfoView = __webpack_require__(/*! current-file-info-view */ 44);
-	
 	// DataCore.logWrites = true;
+	DataCore.set('/__webpack_hash__', __webpack_require__.h);
+	var Chunks = __webpack_require__(/*! chunks */ 19);
 	
-	var CurrentFileInfo = Immutable.Record({
-		name: null,
-		sha1: null
-	});
+	window.getPlayer = function () {
+		return DataCore.get('/player');
+	};
 	
-	var Chunk = Immutable.Record({
-		id: null,
-		time: 0,
-		text: '',
-		done: false,
-		speaker: '1'
-	});
+	window.getCurrentTime = function () {
+		return DataCore.get('/time');
+	};
+	
+	window.setCurrentTime = function (time) {
+		var newTime = +Math.max(time, 0).toFixed(2);
+		getPlayer().currentTime = newTime; // assertion: this is the ONLY place that sets the current player's .currentTime property!
+		currentTimeHint.onNext(newTime);
+	};
+	
+	window.getCurrentChunk = function () {
+		return Chunks.get(getCurrentTime());
+	};
+	
+	window.play = function () {
+		getPlayer().play();
+	};
+	
+	window.pause = function () {
+		getPlayer().pause();
+	};
+	
+	window.isPlaying = function () {
+		return !getPlayer().paused;
+	};
+	
+	var Sha1 = __webpack_require__(/*! js-sha1 */ 21);
+	var CurrentFileInfo = __webpack_require__(/*! current-file-info */ 44);
+	
+	var DataCoreView = __webpack_require__(/*! data-core-view */ 45);
+	var ChunksView = __webpack_require__(/*! chunks-view */ 47);
+	var CurrentFileInfoView = __webpack_require__(/*! current-file-info-view */ 49);
+	var PlayerView = __webpack_require__(/*! player-view */ 50);
+	var UndoView = __webpack_require__(/*! undo-view */ 51);
+	var CommandsView = __webpack_require__(/*! commands-view */ 52);
+	var ClipboardButton = __webpack_require__(/*! clipboard-button */ 53);
+	
+	__webpack_require__(/*! load-and-save */ 54);
 	
 	DataCore.set('/speakers', Immutable.Map());
 	
 	var currentTimeHint = new Rx.Subject(); // since the timeupdate event seems to be async with respect to setting .currentTime
+	
+	function readPlayerTime(player) {
+		return +player.currentTime.toFixed(2); // assertion: this is the ONLY place that reads the current player's .currentTime property!
+	}
 	
 	DataCore.provide('/time', DataCore.observe('/player').flatMapLatest(function (player) {
 		return player ? Rx.Observable.fromEvent(player, 'timeupdate').map(function () {
@@ -95,698 +127,6 @@
 		}) : Rx.Observable.just(false);
 	}).startWith(false));
 	
-	function formatTime(time) {
-		var withoutFrac = Math.trunc(time);
-		var sec = ('0' + withoutFrac % 60).slice(-2);
-		var min = ('0' + Math.trunc(withoutFrac / 60 % 60)).slice(-2);
-		var hours = ('0' + Math.trunc(withoutFrac / 3600)).slice(-2);
-		var frac = ('0' + Math.trunc(time * 10)).slice(-1);
-	
-		return '' + hours + ':' + min + ':' + sec + '.' + frac;
-	}
-	
-	function tryGetFromLocalStorage(key, defaultValue) {
-		if (!localStorage.hasOwnProperty(key)) {
-			return defaultValue;
-		}
-	
-		try {
-			return JSON.parse(localStorage[key]);
-		} catch (e) {
-			return defaultValue;
-		}
-	}
-	
-	function localStorageKeyForFile(file) {
-		return 'transcription_' + file.sha1;
-	}
-	
-	function getPlayer() {
-		return DataCore.get('/player');
-	}
-	
-	function readPlayerTime(player) {
-		return +player.currentTime.toFixed(2); // assertion: this is the ONLY place that reads the current player's .currentTime property!
-	}
-	
-	function getCurrentTime() {
-		return DataCore.get('/time');
-	}
-	
-	function setCurrentTime(time) {
-		var newTime = +Math.max(time, 0).toFixed(2);
-		getPlayer().currentTime = newTime; // assertion: this is the ONLY place that sets the current player's .currentTime property!
-		currentTimeHint.onNext(newTime);
-	}
-	
-	function getCurrentChunk() {
-		return Chunks.get(getCurrentTime());
-	}
-	
-	function play() {
-		getPlayer().play();
-	}
-	
-	function pause() {
-		getPlayer().pause();
-	}
-	
-	function isPlaying() {
-		return !getPlayer().paused;
-	}
-	
-	var Chunks = (function () {
-		var lastId = 0;
-	
-		resetChunks();
-	
-		function resetChunks() {
-			setChunks(Immutable.List.of(createChunk({ time: 0 })));
-		}
-	
-		function createChunk(args) {
-			// factory only, doesn't add to the list of all chunks
-			args = args || {};
-			if (typeof args.time !== 'number') {
-				args.time = getCurrentTime();
-			}
-			args.time = +args.time.toFixed(2);
-			args.id = ++lastId;
-			return new Chunk(args);
-		}
-	
-		function setChunks(newChunks) {
-			DataCore.set('/chunks/all', newChunks); // assertion: this is the ONLY place that assigns to /chunks/all!
-		}
-	
-		function chunkForTime(chunks, time) {
-			// TODO: optimize
-			return chunks.findLast(function (c) {
-				return c.time <= time;
-			});
-		}
-	
-		function chunkBeforeForTime(chunks, time) {
-			var index = chunks.findLastIndex(function (c) {
-				return c.time <= time;
-			});
-			if (index == 0) {
-				return null;
-			} else {
-				return chunks.get(index - 1);
-			}
-		}
-	
-		function chunkAfterForTime(chunks, time) {
-			var index = chunks.findLastIndex(function (c) {
-				return c.time <= time;
-			});
-			if (index == chunks.size - 1) {
-				return null;
-			} else {
-				return chunks.get(index + 1);
-			}
-		}
-	
-		function updateChunk(chunks, chunk) {
-			var index = chunks.findLastIndex(function (c) {
-				return c.time <= chunk.time;
-			});
-			var existingChunk = chunks.get(index);
-	
-			return existingChunk.time === chunk.time ? chunks.set(index, chunk) : chunks.splice(index + 1, 0, chunk);
-		}
-	
-		function withoutChunk(chunks, time) {
-			return chunks.filter(function (c) {
-				return c.time !== time;
-			});
-		}
-	
-		function allChunks() {
-			return DataCore.get('/chunks/all');
-		}
-	
-		DataCore.provide('/chunks/current', DataCore.observeMany({
-			time: '/time',
-			chunks: '/chunks/all'
-		}).filter(function (o) {
-			return o.chunks && typeof o.time === 'number';
-		}).map(function (inputs) {
-			return chunkForTime(inputs.chunks, inputs.time);
-		}));
-	
-		return {
-			set: setChunks,
-			create: createChunk,
-			reset: resetChunks,
-	
-			save: function save(chunk) {
-				setChunks(updateChunk(allChunks(), chunk));
-			},
-	
-			get: function get(time) {
-				return chunkForTime(allChunks(), time);
-			},
-	
-			getAll: function getAll() {
-				return allChunks();
-			},
-	
-			'delete': function _delete(time) {
-				setChunks(withoutChunk(allChunks(), time));
-			},
-	
-			getChunkBefore: function getChunkBefore(time) {
-				return chunkBeforeForTime(allChunks(), time);
-			},
-	
-			getChunkAfter: function getChunkAfter(time) {
-				return chunkAfterForTime(allChunks(), time);
-			},
-	
-			move: function move(chunk, newTime) {
-				if (chunk.time > 0 && chunk.time != newTime) {
-					// first chunk can't move
-					newTime = +newTime.toFixed(2);
-					var newChunk = chunk.set('time', newTime);
-					setChunks(withoutChunk(updateChunk(allChunks(), newChunk), chunk.time));
-				}
-			}
-		};
-	})();
-	
-	DataCore.observe('/file').filter(function (o) {
-		return o;
-	}).map(function (o) {
-		return o.toJS();
-	}).flatMapLatest(function (file) {
-		// We have a new file. Load data.
-		var saved = localStorage[localStorageKeyForFile(file)];
-		if (saved) {
-			try {
-				var parsed = JSON.parse(saved);
-				Chunks.set(Immutable.Seq(parsed.chunks).map(function (c) {
-					return Chunks.create(c);
-				}).toList());
-	
-				DataCore.set('/speakers', Immutable.Map(parsed.speakers));
-			} catch (e) {
-				console.error('error loading saved chunks for ' + file.sha1, e);
-				Chunks.reset();
-				DataCore.set('/speakers', Immutable.Map());
-			}
-		} else {
-			Chunks.reset();
-		}
-	
-		// Now, start auto-save running
-		return DataCore.observeMany({
-			chunks: '/chunks/all',
-			speakers: '/speakers'
-		}).debounce(1000)['do'](function (inputs) {
-			return localStorage[localStorageKeyForFile(file)] = JSON.stringify(inputs);
-		});
-	}).run('load and save');
-	
-	var ChunkView = React.createClass({
-		displayName: 'ChunkView',
-	
-		mixins: [ReactUtils.RxMixin, ReactUtils.ImmutableRenderMixin, React.addons.LinkedStateMixin],
-	
-		componentWillMount: function componentWillMount(newProps) {
-			var _this = this;
-	
-			this.run('handle being current', this.propObserver('current').filter(function (b) {
-				return b;
-			}).flatMap(this.observeRenderCompleted())['do'](function () {
-				return React.findDOMNode(_this.refs.textarea).focus();
-			}));
-	
-			this.run('auto size textarea', Rx.Observable.merge(this.propObserver('chunk').flatMap(this.observeRenderCompleted()), Rx.Observable.fromEvent(window, 'resize'))['do'](function () {
-				var textarea = React.findDOMNode(_this.refs.textarea);
-				if (textarea) {
-					textarea.style.height = '2em';
-					textarea.style.height = '' + textarea.scrollHeight + 'px';
-				}
-			}));
-		},
-	
-		render: function render() {
-			var chunk = this.props.chunk;
-			var currentClass = this.props.current ? 'current' : '';
-			var doneClass = chunk.done ? 'done' : '';
-	
-			var speakers = this.props.speakers;
-			if (!speakers.has(chunk.speaker)) {
-				speakers = speakers.set(chunk.speaker, '');
-			}
-	
-			return React.createElement(
-				'tr',
-				{ className: 'chunk ' + currentClass + ' ' + doneClass },
-				React.createElement(
-					'td',
-					{ className: 'checkCol' },
-					React.createElement('input', { className: 'mousetrap', tabIndex: '-1', type: 'checkbox', checked: chunk.done, onChange: function (e) {
-							return Chunks.save(chunk.set('done', e.target.checked));
-						} })
-				),
-				React.createElement(
-					'td',
-					{ className: 'speakerCol' },
-					React.createElement(
-						'select',
-						{ onChange: function (e) {
-								return Chunks.save(chunk.set('speaker', e.target.value));
-							},
-							value: chunk.speaker,
-							tabIndex: '-1',
-							title: 'This indicates the current speaker. See the keyboard shortcuts for more info.' },
-						speakers.entrySeq().map(function (_ref) {
-							var _ref2 = _slicedToArray(_ref, 2);
-	
-							var n = _ref2[0];
-							var speaker = _ref2[1];
-							return React.createElement(
-								'option',
-								{ key: n, value: n },
-								'' + n + '. ' + speaker
-							);
-						})
-					)
-				),
-				React.createElement(
-					'td',
-					{ className: 'editorCol' },
-					React.createElement('textarea', { className: 'editor mousetrap',
-						ref: 'textarea',
-						onFocus: this.onFocus,
-						value: chunk.text,
-						onChange: function (e) {
-							return Chunks.save(chunk.set('text', e.target.value));
-						}
-					})
-				),
-				React.createElement(
-					'td',
-					{ className: 'timeCol' },
-					formatTime(chunk.time)
-				)
-			);
-		},
-	
-		onFocus: function onFocus() {
-			if (!this.props.current) {
-				setCurrentTime(this.props.chunk.time);
-			}
-		}
-	});
-	
-	var ChunksView = React.createClass({
-		displayName: 'ChunksView',
-	
-		mixins: [ReactUtils.RxMixin, ReactUtils.DataCoreMixin, ReactUtils.ImmutableRenderMixin],
-	
-		componentWillMount: function componentWillMount() {
-			this.run('sd', DataCore.observeMany({
-				speakers: '/speakers',
-				chunks: '/chunks/all',
-				currentChunk: '/chunks/current'
-			}).eventLoopDebounce()['do'](this.setState.bind(this)));
-		},
-	
-		render: function render() {
-			var _this2 = this;
-	
-			if (this.state && this.state.chunks) {
-				return React.createElement(
-					'table',
-					{ className: 'chunks' },
-					React.createElement(
-						'tbody',
-						null,
-						this.state.chunks.map(function (chunk) {
-							return React.createElement(ChunkView, {
-								key: chunk.id,
-								chunk: chunk,
-								current: _this2.state.currentChunk && chunk.time === _this2.state.currentChunk.time,
-								speakers: _this2.state.speakers
-							});
-						})
-					)
-				);
-			} else {
-				return null;
-			}
-		}
-	});
-	
-	var PlayerView = React.createClass({
-		displayName: 'PlayerView',
-	
-		mixins: [ReactUtils.RxMixin, React.addons.LinkedStateMixin],
-	
-		componentDidMount: function componentDidMount() {
-			var _this3 = this;
-	
-			DataCore.set('/player', React.findDOMNode(this.refs.player));
-	
-			// Start "auto-pause while typing" functionality
-			var inputEvent = Rx.Observable.fromEvent(window, 'input').share();
-			var blurEvent = Rx.Observable.create(function (observer) {
-				var handler = function handler(e) {
-					return observer.onNext(e);
-				};
-				window.addEventListener('blur', handler, true);
-				return Rx.Disposable.create(function () {
-					return window.removeEventListener('blur', handler, true);
-				});
-			});
-	
-			var paused = false;
-	
-			this.run('auto pause when typing', DataCore.observe('/playing?').filter(function (b) {
-				return b;
-			})['do'](function () {
-				return paused = false;
-			}).take(1)
-			// the player is playing, start listening for inputEvent:
-			.flatMap(inputEvent)['do'](function () {
-				if (!paused) {
-					paused = true;
-					pause();
-					_this3.autoPausedAt = getCurrentTime() - 1.5; // courtesy rewind a bit
-				}
-			}).debounce(1000)['do'](function () {
-				if (paused) {
-					paused = false;
-					var currentChunk = getCurrentChunk();
-					if (_this3.autoPausedAt && _this3.autoPausedAt > currentChunk.time) {
-						setCurrentTime(_this3.autoPausedAt);
-					} else {
-						setCurrentTime(currentChunk.time);
-					}
-					play();
-				}
-			}).take(1).takeUntil(Rx.Observable.merge(blurEvent, DataCore.observe('/playing?').filter(function (b) {
-				return b;
-			}).skipUntil(inputEvent))).repeat());
-		},
-	
-		render: function render() {
-			return React.createElement(
-				'div',
-				{ className: 'player' },
-				React.createElement('audio', { controls: true, ref: 'player' })
-			);
-		}
-	});
-	
-	var globalUndo = function globalUndo() {};
-	
-	var UndoView = React.createClass({
-		displayName: 'UndoView',
-	
-		mixins: [ReactUtils.RxMixin, ReactUtils.DataCoreMixin, ReactUtils.ImmutableRenderMixin],
-	
-		componentWillMount: function componentWillMount() {
-			var _this4 = this;
-	
-			this.observeIntoState({
-				frames: DataCore.observe('/current/file').flatMapLatest(DataCore.observeMany({
-					chunks: '/chunks/all',
-					speakers: '/speakers'
-				}).eventLoopDebounce().map(function (o) {
-					return Immutable.Map(o);
-				}).map(function (frame) {
-					var prev = _this4.state && _this4.state.frames || Immutable.List();
-					if (Immutable.is(_this4.undoingTo, frame)) {
-						delete _this4.undoingTo;
-						return prev.pop();
-					} else {
-						return prev.push(frame);
-					}
-				}).startWith(Immutable.List()))
-			});
-	
-			globalUndo = this.undo;
-		},
-	
-		render: function render() {
-			return null;
-		},
-	
-		undo: function undo() {
-			var frame = this.state.frames.pop().last();
-			if (frame) {
-				this.undoingTo = frame;
-	
-				Chunks.set(frame.get('chunks'));
-				DataCore.set('/speakers', frame.get('speakers'));
-			}
-		}
-	});
-	
-	var Commands = React.createClass({
-		displayName: 'Commands',
-	
-		mixins: [ReactUtils.RxMixin],
-	
-		getInitialState: function getInitialState() {
-			return {
-				activeCommands: Immutable.Set(),
-				visible: tryGetFromLocalStorage('keyboard_shortcuts_visible', true)
-			};
-		},
-	
-		componentWillMount: function componentWillMount() {
-			var _this5 = this;
-	
-			this.commands = Immutable.OrderedMap();
-	
-			var commandWasRun = new Rx.Subject();
-	
-			var keyboardCommand = function keyboardCommand(keys, desc, handler) {
-				_this5.commands = _this5.commands.set(keys, desc);
-	
-				Mousetrap.bind(keys, function (e) {
-					_this5.setState({ activeCommands: _this5.state.activeCommands.add(keys) });
-					commandWasRun.onNext(keys);
-	
-					e.preventDefault();
-					e.stopPropagation();
-					handler(e);
-				});
-			};
-	
-			Immutable.Range(1, 10).forEach(function (i) {
-				return Mousetrap.bind('ctrl+' + i, function (e) {
-					var chunk = getCurrentChunk();
-					Chunks.save(chunk.set('speaker', String(i)));
-	
-					e.preventDefault();
-					e.stopPropagation();
-				});
-			});
-	
-			keyboardCommand('ctrl+k', 'Show/hide this information about keyboard shortcuts', function () {
-				return _this5.setState({ visible: !_this5.state.visible });
-			});
-	
-			keyboardCommand('ctrl+p', 'Play current chunk from beginning', function () {
-				setCurrentTime(getCurrentChunk().time);
-				play();
-			});
-	
-			keyboardCommand('ctrl+s', 'Stop playing', pause);
-	
-			keyboardCommand('ctrl+enter', 'Create new chunk at the current time', function () {
-				var chunk = getCurrentChunk();
-				var newChunk = Chunks.create({ time: getCurrentTime(), speaker: chunk.speaker });
-				Chunks.save(newChunk);
-			});
-	
-			keyboardCommand('ctrl+[', 'Move current chunk back ½ second', function () {
-				var currentChunk = getCurrentChunk();
-				var prevChunk = Chunks.getChunkBefore(currentChunk.time);
-				if (prevChunk) {
-					var newTime = currentChunk.time - 0.5;
-					if (newTime > prevChunk.time) {
-						setCurrentTime(newTime);
-						Chunks.move(currentChunk, newTime);
-					}
-				}
-			});
-	
-			keyboardCommand('ctrl+]', 'Move current chunk forward ½ second', function () {
-				var currentChunk = getCurrentChunk();
-				var nextChunk = Chunks.getChunkAfter(currentChunk.time);
-				var newTime = currentChunk.time + 0.5;
-				if (!nextChunk || nextChunk.time > newTime) {
-					setCurrentTime(newTime);
-					Chunks.move(currentChunk, newTime);
-				}
-			});
-	
-			keyboardCommand('ctrl+d', 'Delete current chunk', function () {
-				var currentChunk = getCurrentChunk();
-				if (currentChunk.time > 0) {
-					Chunks['delete'](currentChunk.time);
-				}
-			});
-	
-			keyboardCommand('ctrl+;', 'Rewind 1 second', function () {
-				setCurrentTime(getCurrentTime() - 1);
-			});
-	
-			keyboardCommand('ctrl+\'', 'Fast-forward 1 second', function () {
-				setCurrentTime(getCurrentTime() + 1);
-			});
-	
-			keyboardCommand('ctrl+n', 'Set chunk start time to current time', function () {
-				var chunk = getCurrentChunk();
-				Chunks.move(chunk, getCurrentTime());
-			});
-	
-			keyboardCommand('ctrl+/', 'Split chunk at cursor and current time', function () {
-				var currentInput = document.activeElement;
-				if (currentInput && currentInput.tagName === 'TEXTAREA' && currentInput.selectionStart === currentInput.selectionEnd) {
-					var text = currentInput.value;
-					var pos = currentInput.selectionStart;
-					var textBeforeCursor = text.substring(0, pos - 1).replace(/\s+$/, '');
-					var textAfterCursor = text.substring(pos).replace(/^\s+/, '');
-	
-					var currentChunk = getCurrentChunk();
-					Chunks.save(currentChunk.set('text', textBeforeCursor));
-	
-					var newChunk = Chunks.create({ time: getCurrentTime(), text: textAfterCursor, speaker: currentChunk.speaker });
-					Chunks.save(newChunk);
-				}
-			});
-	
-			keyboardCommand('ctrl+z', 'Super Undo', globalUndo);
-	
-			keyboardCommand('ctrl+r', 'Rename speaker', function () {
-				var speakers = DataCore.get('/speakers');
-				var chunk = getCurrentChunk();
-				var currentName = speakers.get(chunk.speaker);
-	
-				var wasPlaying = isPlaying();
-				pause();
-	
-				var newName = window.prompt('Enter the name of the current speaker:', currentName || '');
-	
-				if (wasPlaying) {
-					play();
-				}
-	
-				if (newName !== null) {
-					DataCore.set('/speakers', newName ? speakers.set(chunk.speaker, newName) : speakers['delete'](chunk.speaker));
-				}
-			});
-	
-			// So people can see what keys are being pressed (good for demos)
-			this.run('highlight active keyboard commands', commandWasRun.groupBy(function (keys) {
-				return keys;
-			}).map(function (observable) {
-				return observable.debounce(1000);
-			}).mergeAll()['do'](function (keys) {
-				return _this5.setState({ activeCommands: _this5.state.activeCommands.remove(keys) });
-			}));
-	
-			this.run('track visible preference', this.stateObserver('visible')['do'](function (visible) {
-				return localStorage.keyboard_shortcuts_visible = JSON.stringify(visible);
-			}));
-		},
-	
-		render: function render() {
-			var _this6 = this;
-	
-			if (this.state.visible) {
-				return React.createElement(
-					'table',
-					{ className: 'shortcuts' },
-					React.createElement(
-						'tbody',
-						null,
-						this.commands.entrySeq().map(function (_ref3) {
-							var _ref32 = _slicedToArray(_ref3, 2);
-	
-							var keys = _ref32[0];
-							var desc = _ref32[1];
-							return React.createElement(
-								'tr',
-								{ key: keys, className: 'shortcut ' + (_this6.state.activeCommands.has(keys) ? 'active' : 'inactive') },
-								React.createElement(
-									'td',
-									{ className: 'shortcut-key' },
-									keys.replace(/^ctrl\+/, 'control ')
-								),
-								React.createElement(
-									'td',
-									null,
-									'→   ',
-									desc
-								)
-							);
-						})
-					),
-					React.createElement(
-						'tbody',
-						null,
-						React.createElement(
-							'tr',
-							{ className: 'shortcut' },
-							React.createElement(
-								'td',
-								{ className: 'shortcut-key' },
-								'control 1-9'
-							),
-							React.createElement(
-								'td',
-								null,
-								'→   Set speaker for current chunk'
-							)
-						)
-					)
-				);
-			} else {
-				return React.createElement(
-					'div',
-					{ className: 'hidden-shortcuts' },
-					'Press control k to see the keyboard shortcuts'
-				);
-			}
-		}
-	});
-	
-	var ClipboardButton = React.createClass({
-		displayName: 'ClipboardButton',
-	
-		componentDidMount: function componentDidMount() {
-			var button = React.findDOMNode(this.refs.copy);
-			var client = new ZeroClipboard(button);
-			client.on('copy', function (e) {
-				var clipboard = e.clipboardData;
-				var allText = Chunks.getAll().map(function (chunk) {
-					return chunk.text;
-				}).join('\n\n');
-				clipboard.setData('text/plain', allText);
-			});
-		},
-	
-		render: function render() {
-			return React.createElement(
-				'a',
-				{ className: 'copy-button', href: '', onClick: function (e) {
-						return e.preventDefault();
-					}, ref: 'copy' },
-				'Copy'
-			);
-		}
-	});
-	
 	var MainUI = React.createClass({
 		displayName: 'MainUI',
 	
@@ -799,7 +139,7 @@
 		},
 	
 		componentWillMount: function componentWillMount() {
-			var _this7 = this;
+			var _this = this;
 	
 			this.bindToDataCore({
 				file: '/file'
@@ -816,7 +156,7 @@
 				if (e.dataTransfer.files.length) {
 					(function () {
 						var file = e.dataTransfer.files[0];
-						_this7.setState({ loading: file.name });
+						_this.setState({ loading: file.name });
 	
 						var reader = new FileReader();
 						reader.onload = function () {
@@ -824,7 +164,7 @@
 							var objectUrl = URL.createObjectURL(file);
 							getPlayer().src = objectUrl;
 							DataCore.set('/file', new CurrentFileInfo({ name: file.name, sha1: sha1 }));
-							_this7.setState({ loading: null });
+							_this.setState({ loading: null });
 						};
 						reader.readAsArrayBuffer(file);
 					})();
@@ -851,7 +191,7 @@
 					'div',
 					null,
 					React.createElement(UndoView, null),
-					React.createElement(Commands, null),
+					React.createElement(CommandsView, null),
 					React.createElement(ChunksView, null)
 				)
 			);
@@ -34401,37 +33741,157 @@
 
 /***/ },
 /* 19 */
-/*!**********************!*\
-  !*** ./js/utils.jsx ***!
-  \**********************/
+/*!***********************!*\
+  !*** ./js/chunks.jsx ***!
+  \***********************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var Rx = __webpack_require__(/*! rx */ 11);
+	var Immutable = __webpack_require__(/*! immutable */ 9);
+	var Chunk = __webpack_require__(/*! chunk */ 20);
+	var DataCore = __webpack_require__(/*! data-core */ 18);
+	
+	var lastId = 0;
+	
+	resetChunks();
+	
+	function resetChunks() {
+		setChunks(Immutable.List.of(createChunk({ time: 0 })));
+	}
+	
+	function createChunk(args) {
+		// factory only, doesn't add to the list of all chunks
+		args = args || {};
+		if (typeof args.time !== 'number') {
+			args.time = getCurrentTime();
+		}
+		args.time = +args.time.toFixed(2);
+		args.id = ++lastId;
+		return new Chunk(args);
+	}
+	
+	function setChunks(newChunks) {
+		DataCore.set('/chunks/all', newChunks); // assertion: this is the ONLY place that assigns to /chunks/all!
+	}
+	
+	function chunkForTime(chunks, time) {
+		// TODO: optimize
+		return chunks.findLast(function (c) {
+			return c.time <= time;
+		});
+	}
+	
+	function chunkBeforeForTime(chunks, time) {
+		var index = chunks.findLastIndex(function (c) {
+			return c.time <= time;
+		});
+		if (index == 0) {
+			return null;
+		} else {
+			return chunks.get(index - 1);
+		}
+	}
+	
+	function chunkAfterForTime(chunks, time) {
+		var index = chunks.findLastIndex(function (c) {
+			return c.time <= time;
+		});
+		if (index == chunks.size - 1) {
+			return null;
+		} else {
+			return chunks.get(index + 1);
+		}
+	}
+	
+	function updateChunk(chunks, chunk) {
+		var index = chunks.findLastIndex(function (c) {
+			return c.time <= chunk.time;
+		});
+		var existingChunk = chunks.get(index);
+	
+		return existingChunk.time === chunk.time ? chunks.set(index, chunk) : chunks.splice(index + 1, 0, chunk);
+	}
+	
+	function withoutChunk(chunks, time) {
+		return chunks.filter(function (c) {
+			return c.time !== time;
+		});
+	}
+	
+	function allChunks() {
+		return DataCore.get('/chunks/all');
+	}
+	
+	DataCore.provide('/chunks/current', DataCore.observeMany({
+		time: '/time',
+		chunks: '/chunks/all'
+	}).filter(function (o) {
+		return o.chunks && typeof o.time === 'number';
+	}).map(function (inputs) {
+		return chunkForTime(inputs.chunks, inputs.time);
+	}));
 	
 	module.exports = {
-		pouchDbChanges: function pouchDbChanges(db, options) {
-			return Rx.Observable.create(function (observer) {
-				var changes = db.changes(options);
-				changes.on('change', observer.onNext.bind(observer));
-				return Rx.Disposable.create(function () {
-					return changes.cancel();
-				});
-			});
+		set: setChunks,
+		create: createChunk,
+		reset: resetChunks,
+	
+		save: function save(chunk) {
+			setChunks(updateChunk(allChunks(), chunk));
 		},
 	
-		catchExpr: function catchExpr(fn, exFn) {
-			try {
-				return fn();
-			} catch (e) {
-				return exFn(e);
+		get: function get(time) {
+			return chunkForTime(allChunks(), time);
+		},
+	
+		getAll: function getAll() {
+			return allChunks();
+		},
+	
+		'delete': function _delete(time) {
+			setChunks(withoutChunk(allChunks(), time));
+		},
+	
+		getChunkBefore: function getChunkBefore(time) {
+			return chunkBeforeForTime(allChunks(), time);
+		},
+	
+		getChunkAfter: function getChunkAfter(time) {
+			return chunkAfterForTime(allChunks(), time);
+		},
+	
+		move: function move(chunk, newTime) {
+			if (chunk.time > 0 && chunk.time != newTime) {
+				// first chunk can't move
+				newTime = +newTime.toFixed(2);
+				var newChunk = chunk.set('time', newTime);
+				setChunks(withoutChunk(updateChunk(allChunks(), newChunk), chunk.time));
 			}
 		}
 	};
 
 /***/ },
 /* 20 */
+/*!**********************!*\
+  !*** ./js/chunk.jsx ***!
+  \**********************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Immutable = __webpack_require__(/*! immutable */ 9);
+	
+	module.exports = Immutable.Record({
+		id: null,
+		time: 0,
+		text: '',
+		done: false,
+		speaker: '1'
+	});
+
+/***/ },
+/* 21 */
 /*!*******************************!*\
   !*** ./~/js-sha1/src/sha1.js ***!
   \*******************************/
@@ -34661,8 +34121,8 @@
 	  };
 	
 	  if(!root.JS_SHA1_TEST && typeof(module) != 'undefined') {
-	    var crypto = __webpack_require__(/*! crypto */ 21);
-	    var Buffer = __webpack_require__(/*! buffer */ 22).Buffer;
+	    var crypto = __webpack_require__(/*! crypto */ 22);
+	    var Buffer = __webpack_require__(/*! buffer */ 23).Buffer;
 	
 	    module.exports = function(message) {
 	      if(typeof(message) == 'string') {
@@ -34681,13 +34141,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 21 */
+/* 22 */
 /*!**********************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/index.js ***!
   \**********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Buffer) {var rng = __webpack_require__(/*! ./rng */ 26)
+	/* WEBPACK VAR INJECTION */(function(Buffer) {var rng = __webpack_require__(/*! ./rng */ 27)
 	
 	function error () {
 	  var m = [].slice.call(arguments).join(' ')
@@ -34698,9 +34158,9 @@
 	    ].join('\n'))
 	}
 	
-	exports.createHash = __webpack_require__(/*! ./create-hash */ 28)
+	exports.createHash = __webpack_require__(/*! ./create-hash */ 29)
 	
-	exports.createHmac = __webpack_require__(/*! ./create-hmac */ 40)
+	exports.createHmac = __webpack_require__(/*! ./create-hmac */ 41)
 	
 	exports.randomBytes = function(size, callback) {
 	  if (callback && callback.call) {
@@ -34721,7 +34181,7 @@
 	  return ['sha1', 'sha256', 'sha512', 'md5', 'rmd160']
 	}
 	
-	var p = __webpack_require__(/*! ./pbkdf2 */ 41)(exports)
+	var p = __webpack_require__(/*! ./pbkdf2 */ 42)(exports)
 	exports.pbkdf2 = p.pbkdf2
 	exports.pbkdf2Sync = p.pbkdf2Sync
 	
@@ -34741,10 +34201,10 @@
 	  }
 	})
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 22).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 23).Buffer))
 
 /***/ },
-/* 22 */
+/* 23 */
 /*!***********************************************!*\
   !*** ./~/node-libs-browser/~/buffer/index.js ***!
   \***********************************************/
@@ -34757,9 +34217,9 @@
 	 * @license  MIT
 	 */
 	
-	var base64 = __webpack_require__(/*! base64-js */ 23)
-	var ieee754 = __webpack_require__(/*! ieee754 */ 24)
-	var isArray = __webpack_require__(/*! is-array */ 25)
+	var base64 = __webpack_require__(/*! base64-js */ 24)
+	var ieee754 = __webpack_require__(/*! ieee754 */ 25)
+	var isArray = __webpack_require__(/*! is-array */ 26)
 	
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -36165,10 +35625,10 @@
 	  }
 	}
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 22).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 23).Buffer))
 
 /***/ },
-/* 23 */
+/* 24 */
 /*!*************************************************************!*\
   !*** ./~/node-libs-browser/~/buffer/~/base64-js/lib/b64.js ***!
   \*************************************************************/
@@ -36301,7 +35761,7 @@
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /*!*********************************************************!*\
   !*** ./~/node-libs-browser/~/buffer/~/ieee754/index.js ***!
   \*********************************************************/
@@ -36394,7 +35854,7 @@
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /*!**********************************************************!*\
   !*** ./~/node-libs-browser/~/buffer/~/is-array/index.js ***!
   \**********************************************************/
@@ -36436,7 +35896,7 @@
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /*!********************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/rng.js ***!
   \********************************************************/
@@ -36445,7 +35905,7 @@
 	/* WEBPACK VAR INJECTION */(function(global, Buffer) {(function() {
 	  var g = ('undefined' === typeof window ? global : window) || {}
 	  _crypto = (
-	    g.crypto || g.msCrypto || __webpack_require__(/*! crypto */ 27)
+	    g.crypto || g.msCrypto || __webpack_require__(/*! crypto */ 28)
 	  )
 	  module.exports = function(size) {
 	    // Modern Browsers
@@ -36469,10 +35929,10 @@
 	  }
 	}())
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 22).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 23).Buffer))
 
 /***/ },
-/* 27 */
+/* 28 */
 /*!************************!*\
   !*** crypto (ignored) ***!
   \************************/
@@ -36481,16 +35941,16 @@
 	/* (ignored) */
 
 /***/ },
-/* 28 */
+/* 29 */
 /*!****************************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/create-hash.js ***!
   \****************************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Buffer) {var createHash = __webpack_require__(/*! sha.js */ 29)
+	/* WEBPACK VAR INJECTION */(function(Buffer) {var createHash = __webpack_require__(/*! sha.js */ 30)
 	
-	var md5 = toConstructor(__webpack_require__(/*! ./md5 */ 37))
-	var rmd160 = toConstructor(__webpack_require__(/*! ripemd160 */ 39))
+	var md5 = toConstructor(__webpack_require__(/*! ./md5 */ 38))
+	var rmd160 = toConstructor(__webpack_require__(/*! ripemd160 */ 40))
 	
 	function toConstructor (fn) {
 	  return function () {
@@ -36518,10 +35978,10 @@
 	  return createHash(alg)
 	}
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 22).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 23).Buffer))
 
 /***/ },
-/* 29 */
+/* 30 */
 /*!*******************************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/~/sha.js/index.js ***!
   \*******************************************************************/
@@ -36533,16 +35993,16 @@
 	  return new Alg()
 	}
 	
-	var Buffer = __webpack_require__(/*! buffer */ 22).Buffer
-	var Hash   = __webpack_require__(/*! ./hash */ 30)(Buffer)
+	var Buffer = __webpack_require__(/*! buffer */ 23).Buffer
+	var Hash   = __webpack_require__(/*! ./hash */ 31)(Buffer)
 	
-	exports.sha1 = __webpack_require__(/*! ./sha1 */ 31)(Buffer, Hash)
-	exports.sha256 = __webpack_require__(/*! ./sha256 */ 35)(Buffer, Hash)
-	exports.sha512 = __webpack_require__(/*! ./sha512 */ 36)(Buffer, Hash)
+	exports.sha1 = __webpack_require__(/*! ./sha1 */ 32)(Buffer, Hash)
+	exports.sha256 = __webpack_require__(/*! ./sha256 */ 36)(Buffer, Hash)
+	exports.sha512 = __webpack_require__(/*! ./sha512 */ 37)(Buffer, Hash)
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /*!******************************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/~/sha.js/hash.js ***!
   \******************************************************************/
@@ -36628,7 +36088,7 @@
 
 
 /***/ },
-/* 31 */
+/* 32 */
 /*!******************************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/~/sha.js/sha1.js ***!
   \******************************************************************/
@@ -36643,7 +36103,7 @@
 	 * See http://pajhome.org.uk/crypt/md5 for details.
 	 */
 	
-	var inherits = __webpack_require__(/*! util */ 32).inherits
+	var inherits = __webpack_require__(/*! util */ 33).inherits
 	
 	module.exports = function (Buffer, Hash) {
 	
@@ -36775,7 +36235,7 @@
 
 
 /***/ },
-/* 32 */
+/* 33 */
 /*!********************************************!*\
   !*** ./~/node-libs-browser/~/util/util.js ***!
   \********************************************/
@@ -37306,7 +36766,7 @@
 	}
 	exports.isPrimitive = isPrimitive;
 	
-	exports.isBuffer = __webpack_require__(/*! ./support/isBuffer */ 33);
+	exports.isBuffer = __webpack_require__(/*! ./support/isBuffer */ 34);
 	
 	function objectToString(o) {
 	  return Object.prototype.toString.call(o);
@@ -37350,7 +36810,7 @@
 	 *     prototype.
 	 * @param {function} superCtor Constructor function to inherit prototype from.
 	 */
-	exports.inherits = __webpack_require__(/*! inherits */ 34);
+	exports.inherits = __webpack_require__(/*! inherits */ 35);
 	
 	exports._extend = function(origin, add) {
 	  // Don't do anything if add isn't an object
@@ -37371,7 +36831,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./~/node-libs-browser/~/process/browser.js */ 14)))
 
 /***/ },
-/* 33 */
+/* 34 */
 /*!***************************************************************!*\
   !*** ./~/node-libs-browser/~/util/support/isBufferBrowser.js ***!
   \***************************************************************/
@@ -37385,7 +36845,7 @@
 	}
 
 /***/ },
-/* 34 */
+/* 35 */
 /*!*******************************************************************!*\
   !*** ./~/node-libs-browser/~/util/~/inherits/inherits_browser.js ***!
   \*******************************************************************/
@@ -37417,7 +36877,7 @@
 
 
 /***/ },
-/* 35 */
+/* 36 */
 /*!********************************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/~/sha.js/sha256.js ***!
   \********************************************************************/
@@ -37432,7 +36892,7 @@
 	 *
 	 */
 	
-	var inherits = __webpack_require__(/*! util */ 32).inherits
+	var inherits = __webpack_require__(/*! util */ 33).inherits
 	
 	module.exports = function (Buffer, Hash) {
 	
@@ -37573,13 +37033,13 @@
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /*!********************************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/~/sha.js/sha512.js ***!
   \********************************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var inherits = __webpack_require__(/*! util */ 32).inherits
+	var inherits = __webpack_require__(/*! util */ 33).inherits
 	
 	module.exports = function (Buffer, Hash) {
 	  var K = [
@@ -37826,7 +37286,7 @@
 
 
 /***/ },
-/* 37 */
+/* 38 */
 /*!********************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/md5.js ***!
   \********************************************************/
@@ -37841,7 +37301,7 @@
 	 * See http://pajhome.org.uk/crypt/md5 for more info.
 	 */
 	
-	var helpers = __webpack_require__(/*! ./helpers */ 38);
+	var helpers = __webpack_require__(/*! ./helpers */ 39);
 	
 	/*
 	 * Calculate the MD5 of an array of little-endian words, and a bit length
@@ -37990,7 +37450,7 @@
 
 
 /***/ },
-/* 38 */
+/* 39 */
 /*!************************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/helpers.js ***!
   \************************************************************/
@@ -38031,10 +37491,10 @@
 	
 	module.exports = { hash: hash };
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 22).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 23).Buffer))
 
 /***/ },
-/* 39 */
+/* 40 */
 /*!******************************************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/~/ripemd160/lib/ripemd160.js ***!
   \******************************************************************************/
@@ -38246,16 +37706,16 @@
 	
 	
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 22).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 23).Buffer))
 
 /***/ },
-/* 40 */
+/* 41 */
 /*!****************************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/create-hmac.js ***!
   \****************************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Buffer) {var createHash = __webpack_require__(/*! ./create-hash */ 28)
+	/* WEBPACK VAR INJECTION */(function(Buffer) {var createHash = __webpack_require__(/*! ./create-hash */ 29)
 	
 	var zeroBuffer = new Buffer(128)
 	zeroBuffer.fill(0)
@@ -38299,16 +37759,16 @@
 	}
 	
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 22).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 23).Buffer))
 
 /***/ },
-/* 41 */
+/* 42 */
 /*!***********************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/pbkdf2.js ***!
   \***********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var pbkdf2Export = __webpack_require__(/*! pbkdf2-compat/pbkdf2 */ 42)
+	var pbkdf2Export = __webpack_require__(/*! pbkdf2-compat/pbkdf2 */ 43)
 	
 	module.exports = function (crypto, exports) {
 	  exports = exports || {}
@@ -38323,7 +37783,7 @@
 
 
 /***/ },
-/* 42 */
+/* 43 */
 /*!***************************************************************************!*\
   !*** ./~/node-libs-browser/~/crypto-browserify/~/pbkdf2-compat/pbkdf2.js ***!
   \***************************************************************************/
@@ -38414,10 +37874,26 @@
 	  }
 	}
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 22).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/buffer/index.js */ 23).Buffer))
 
 /***/ },
-/* 43 */
+/* 44 */
+/*!**********************************!*\
+  !*** ./js/current-file-info.jsx ***!
+  \**********************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Immutable = __webpack_require__(/*! immutable */ 9);
+	
+	module.exports = Immutable.Record({
+		name: null,
+		sha1: null
+	});
+
+/***/ },
+/* 45 */
 /*!*******************************!*\
   !*** ./js/data-core-view.jsx ***!
   \*******************************/
@@ -38432,7 +37908,7 @@
 	var React = __webpack_require__(/*! react */ 15);
 	var ReactUtils = __webpack_require__(/*! react-utils */ 17);
 	var DataCore = __webpack_require__(/*! data-core */ 18);
-	var Ω = __webpack_require__(/*! utils */ 19);
+	var Ω = __webpack_require__(/*! utils */ 46);
 	
 	function describeValue(value) {
 		if (Immutable.Iterable.isKeyed(value)) {
@@ -38458,8 +37934,8 @@
 		}
 	}
 	
-	module.exports = React.createClass({
-		displayName: 'exports',
+	var DataCoreView = React.createClass({
+		displayName: 'DataCoreView',
 	
 		mixins: [ReactUtils.RxMixin, ReactUtils.ImmutableRenderMixin],
 	
@@ -38551,9 +38027,211 @@
 			this.setState({ path: this.state.path.replace(/\/[^\/]+\/?\s*$/, '') || '/' });
 		}
 	});
+	
+	module.exports = DataCoreView;
 
 /***/ },
-/* 44 */
+/* 46 */
+/*!**********************!*\
+  !*** ./js/utils.jsx ***!
+  \**********************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Rx = __webpack_require__(/*! rx */ 11);
+	
+	module.exports = {
+		catchExpr: function catchExpr(fn, exFn) {
+			try {
+				return fn();
+			} catch (e) {
+				return exFn(e);
+			}
+		}
+	};
+
+/***/ },
+/* 47 */
+/*!****************************!*\
+  !*** ./js/chunks-view.jsx ***!
+  \****************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Immutable = __webpack_require__(/*! immutable */ 9);
+	var React = __webpack_require__(/*! react */ 15);
+	var ReactUtils = __webpack_require__(/*! react-utils */ 17);
+	var DataCore = __webpack_require__(/*! data-core */ 18);
+	var ChunkView = __webpack_require__(/*! chunk-view */ 48);
+	
+	var ChunksView = React.createClass({
+		displayName: 'ChunksView',
+	
+		mixins: [ReactUtils.RxMixin, ReactUtils.DataCoreMixin, ReactUtils.ImmutableRenderMixin],
+	
+		componentWillMount: function componentWillMount() {
+			this.run('sd', DataCore.observeMany({
+				speakers: '/speakers',
+				chunks: '/chunks/all',
+				currentChunk: '/chunks/current'
+			})['do'](this.setState.bind(this)));
+		},
+	
+		render: function render() {
+			var _this = this;
+	
+			if (this.state && this.state.chunks) {
+				return React.createElement(
+					'table',
+					{ className: 'chunks' },
+					React.createElement(
+						'tbody',
+						null,
+						this.state.chunks.map(function (chunk) {
+							return React.createElement(ChunkView, {
+								key: chunk.id,
+								chunk: chunk,
+								current: _this.state.currentChunk && chunk.time === _this.state.currentChunk.time,
+								speakers: _this.state.speakers
+							});
+						})
+					)
+				);
+			} else {
+				return null;
+			}
+		}
+	});
+	
+	module.exports = ChunksView;
+
+/***/ },
+/* 48 */
+/*!***************************!*\
+  !*** ./js/chunk-view.jsx ***!
+  \***************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }
+	
+	var Immutable = __webpack_require__(/*! immutable */ 9);
+	var React = __webpack_require__(/*! react */ 15);
+	var ReactUtils = __webpack_require__(/*! react-utils */ 17);
+	var Rx = __webpack_require__(/*! rx */ 11);
+	var Chunks = __webpack_require__(/*! chunks */ 19);
+	
+	function formatTime(time) {
+		var withoutFrac = Math.trunc(time);
+		var sec = ('0' + withoutFrac % 60).slice(-2);
+		var min = ('0' + Math.trunc(withoutFrac / 60 % 60)).slice(-2);
+		var hours = ('0' + Math.trunc(withoutFrac / 3600)).slice(-2);
+		var frac = ('0' + Math.trunc(time * 10)).slice(-1);
+	
+		return '' + hours + ':' + min + ':' + sec + '.' + frac;
+	}
+	
+	var ChunkView = React.createClass({
+		displayName: 'ChunkView',
+	
+		mixins: [ReactUtils.RxMixin, ReactUtils.ImmutableRenderMixin, React.addons.LinkedStateMixin],
+	
+		componentWillMount: function componentWillMount(newProps) {
+			var _this = this;
+	
+			this.run('handle being current', this.propObserver('current').filter(function (b) {
+				return b;
+			}).flatMap(this.observeRenderCompleted())['do'](function () {
+				return React.findDOMNode(_this.refs.textarea).focus();
+			}));
+	
+			this.run('auto size textarea', Rx.Observable.merge(this.propObserver('chunk').flatMap(this.observeRenderCompleted()), Rx.Observable.fromEvent(window, 'resize'))['do'](function () {
+				var textarea = React.findDOMNode(_this.refs.textarea);
+				if (textarea) {
+					textarea.style.height = '2em';
+					textarea.style.height = '' + textarea.scrollHeight + 'px';
+				}
+			}));
+		},
+	
+		render: function render() {
+			var chunk = this.props.chunk;
+			var currentClass = this.props.current ? 'current' : '';
+			var doneClass = chunk.done ? 'done' : '';
+	
+			var speakers = this.props.speakers;
+			if (!speakers.has(chunk.speaker)) {
+				speakers = speakers.set(chunk.speaker, '');
+			}
+	
+			return React.createElement(
+				'tr',
+				{ className: 'chunk ' + currentClass + ' ' + doneClass },
+				React.createElement(
+					'td',
+					{ className: 'checkCol' },
+					React.createElement('input', { className: 'mousetrap', tabIndex: '-1', type: 'checkbox', checked: chunk.done, onChange: function (e) {
+							return Chunks.save(chunk.set('done', e.target.checked));
+						} })
+				),
+				React.createElement(
+					'td',
+					{ className: 'speakerCol' },
+					React.createElement(
+						'select',
+						{ onChange: function (e) {
+								return Chunks.save(chunk.set('speaker', e.target.value));
+							},
+							value: chunk.speaker,
+							tabIndex: '-1',
+							title: 'This indicates the current speaker. See the keyboard shortcuts for more info.' },
+						speakers.entrySeq().map(function (_ref) {
+							var _ref2 = _slicedToArray(_ref, 2);
+	
+							var n = _ref2[0];
+							var speaker = _ref2[1];
+							return React.createElement(
+								'option',
+								{ key: n, value: n },
+								'' + n + '. ' + speaker
+							);
+						})
+					)
+				),
+				React.createElement(
+					'td',
+					{ className: 'editorCol' },
+					React.createElement('textarea', { className: 'editor mousetrap',
+						ref: 'textarea',
+						onFocus: this.onFocus,
+						value: chunk.text,
+						onChange: function (e) {
+							return Chunks.save(chunk.set('text', e.target.value));
+						}
+					})
+				),
+				React.createElement(
+					'td',
+					{ className: 'timeCol' },
+					formatTime(chunk.time)
+				)
+			);
+		},
+	
+		onFocus: function onFocus() {
+			if (!this.props.current) {
+				setCurrentTime(this.props.chunk.time);
+			}
+		}
+	});
+	
+	module.exports = ChunkView;
+
+/***/ },
+/* 49 */
 /*!***************************************!*\
   !*** ./js/current-file-info-view.jsx ***!
   \***************************************/
@@ -38563,8 +38241,8 @@
 	
 	var React = __webpack_require__(/*! react */ 15);
 	
-	module.exports = React.createClass({
-		displayName: 'exports',
+	var CurrentFileInfoView = React.createClass({
+		displayName: 'CurrentFileInfoView',
 	
 		render: function render() {
 			return React.createElement(
@@ -38578,6 +38256,481 @@
 			);
 		}
 	});
+	
+	module.exports = CurrentFileInfoView;
+
+/***/ },
+/* 50 */
+/*!****************************!*\
+  !*** ./js/player-view.jsx ***!
+  \****************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Immutable = __webpack_require__(/*! immutable */ 9);
+	var React = __webpack_require__(/*! react */ 15);
+	var ReactUtils = __webpack_require__(/*! react-utils */ 17);
+	var Rx = __webpack_require__(/*! rx */ 11);
+	var DataCore = __webpack_require__(/*! data-core */ 18);
+	
+	var PlayerView = React.createClass({
+		displayName: 'PlayerView',
+	
+		mixins: [ReactUtils.RxMixin, React.addons.LinkedStateMixin],
+	
+		componentDidMount: function componentDidMount() {
+			var _this = this;
+	
+			DataCore.set('/player', React.findDOMNode(this.refs.player));
+	
+			// Start "auto-pause while typing" functionality
+			var inputEvent = Rx.Observable.fromEvent(window, 'input').share();
+			var blurEvent = Rx.Observable.create(function (observer) {
+				var handler = function handler(e) {
+					return observer.onNext(e);
+				};
+				window.addEventListener('blur', handler, true);
+				return Rx.Disposable.create(function () {
+					return window.removeEventListener('blur', handler, true);
+				});
+			});
+	
+			var paused = false;
+	
+			this.run('auto pause when typing', DataCore.observe('/playing?').filter(function (b) {
+				return b;
+			})['do'](function () {
+				return paused = false;
+			}).take(1)
+			// the player is playing, start listening for inputEvent:
+			.flatMap(inputEvent)['do'](function () {
+				if (!paused) {
+					paused = true;
+					pause();
+					_this.autoPausedAt = getCurrentTime() - 1.5; // courtesy rewind a bit
+				}
+			}).debounce(1000)['do'](function () {
+				if (paused) {
+					paused = false;
+					var currentChunk = getCurrentChunk();
+					if (_this.autoPausedAt && _this.autoPausedAt > currentChunk.time) {
+						setCurrentTime(_this.autoPausedAt);
+					} else {
+						setCurrentTime(currentChunk.time);
+					}
+					play();
+				}
+			}).take(1).takeUntil(Rx.Observable.merge(blurEvent, DataCore.observe('/playing?').filter(function (b) {
+				return b;
+			}).skipUntil(inputEvent))).repeat());
+		},
+	
+		render: function render() {
+			return React.createElement(
+				'div',
+				{ className: 'player' },
+				React.createElement('audio', { controls: true, ref: 'player' })
+			);
+		}
+	});
+	
+	module.exports = PlayerView;
+
+/***/ },
+/* 51 */
+/*!**************************!*\
+  !*** ./js/undo-view.jsx ***!
+  \**************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Immutable = __webpack_require__(/*! immutable */ 9);
+	var React = __webpack_require__(/*! react */ 15);
+	var ReactUtils = __webpack_require__(/*! react-utils */ 17);
+	var DataCore = __webpack_require__(/*! data-core */ 18);
+	var Chunks = __webpack_require__(/*! chunks */ 19);
+	
+	window.globalUndo = function () {};
+	
+	var UndoView = React.createClass({
+		displayName: 'UndoView',
+	
+		mixins: [ReactUtils.RxMixin, ReactUtils.DataCoreMixin, ReactUtils.ImmutableRenderMixin],
+	
+		componentWillMount: function componentWillMount() {
+			var _this = this;
+	
+			this.observeIntoState({
+				frames: DataCore.observe('/current/file').flatMapLatest(DataCore.observeMany({
+					chunks: '/chunks/all',
+					speakers: '/speakers'
+				}).eventLoopDebounce().map(function (o) {
+					return Immutable.Map(o);
+				}).map(function (frame) {
+					var prev = _this.state && _this.state.frames || Immutable.List();
+					if (Immutable.is(_this.undoingTo, frame)) {
+						delete _this.undoingTo;
+						return prev.pop();
+					} else {
+						return prev.push(frame);
+					}
+				}).startWith(Immutable.List()))
+			});
+	
+			window.globalUndo = this.undo;
+		},
+	
+		render: function render() {
+			return null;
+		},
+	
+		undo: function undo() {
+			var frame = this.state.frames.pop().last();
+			if (frame) {
+				this.undoingTo = frame;
+	
+				Chunks.set(frame.get('chunks'));
+				DataCore.set('/speakers', frame.get('speakers'));
+			}
+		}
+	});
+	
+	module.exports = UndoView;
+
+/***/ },
+/* 52 */
+/*!******************************!*\
+  !*** ./js/commands-view.jsx ***!
+  \******************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }
+	
+	var Immutable = __webpack_require__(/*! immutable */ 9);
+	var React = __webpack_require__(/*! react */ 15);
+	var ReactUtils = __webpack_require__(/*! react-utils */ 17);
+	var DataCore = __webpack_require__(/*! data-core */ 18);
+	var Chunks = __webpack_require__(/*! chunks */ 19);
+	
+	function tryGetFromLocalStorage(key, defaultValue) {
+		if (!localStorage.hasOwnProperty(key)) {
+			return defaultValue;
+		}
+	
+		try {
+			return JSON.parse(localStorage[key]);
+		} catch (e) {
+			return defaultValue;
+		}
+	}
+	
+	var CommandsView = React.createClass({
+		displayName: 'CommandsView',
+	
+		mixins: [ReactUtils.RxMixin],
+	
+		getInitialState: function getInitialState() {
+			return {
+				activeCommands: Immutable.Set(),
+				visible: tryGetFromLocalStorage('keyboard_shortcuts_visible', true)
+			};
+		},
+	
+		componentWillMount: function componentWillMount() {
+			var _this = this;
+	
+			this.commands = Immutable.OrderedMap();
+	
+			var commandWasRun = new Rx.Subject();
+	
+			var keyboardCommand = function keyboardCommand(keys, desc, handler) {
+				_this.commands = _this.commands.set(keys, desc);
+	
+				Mousetrap.bind(keys, function (e) {
+					_this.setState({ activeCommands: _this.state.activeCommands.add(keys) });
+					commandWasRun.onNext(keys);
+	
+					e.preventDefault();
+					e.stopPropagation();
+					handler(e);
+				});
+			};
+	
+			Immutable.Range(1, 10).forEach(function (i) {
+				return Mousetrap.bind('ctrl+' + i, function (e) {
+					var chunk = getCurrentChunk();
+					Chunks.save(chunk.set('speaker', String(i)));
+	
+					e.preventDefault();
+					e.stopPropagation();
+				});
+			});
+	
+			keyboardCommand('ctrl+k', 'Show/hide this information about keyboard shortcuts', function () {
+				return _this.setState({ visible: !_this.state.visible });
+			});
+	
+			keyboardCommand('ctrl+p', 'Play current chunk from beginning', function () {
+				setCurrentTime(getCurrentChunk().time);
+				play();
+			});
+	
+			keyboardCommand('ctrl+s', 'Stop playing', pause);
+	
+			keyboardCommand('ctrl+enter', 'Create new chunk at the current time', function () {
+				var chunk = getCurrentChunk();
+				var newChunk = Chunks.create({ time: getCurrentTime(), speaker: chunk.speaker });
+				Chunks.save(newChunk);
+			});
+	
+			keyboardCommand('ctrl+[', 'Move current chunk back ½ second', function () {
+				var currentChunk = getCurrentChunk();
+				var prevChunk = Chunks.getChunkBefore(currentChunk.time);
+				if (prevChunk) {
+					var newTime = currentChunk.time - 0.5;
+					if (newTime > prevChunk.time) {
+						setCurrentTime(newTime);
+						Chunks.move(currentChunk, newTime);
+					}
+				}
+			});
+	
+			keyboardCommand('ctrl+]', 'Move current chunk forward ½ second', function () {
+				var currentChunk = getCurrentChunk();
+				var nextChunk = Chunks.getChunkAfter(currentChunk.time);
+				var newTime = currentChunk.time + 0.5;
+				if (!nextChunk || nextChunk.time > newTime) {
+					setCurrentTime(newTime);
+					Chunks.move(currentChunk, newTime);
+				}
+			});
+	
+			keyboardCommand('ctrl+d', 'Delete current chunk', function () {
+				var currentChunk = getCurrentChunk();
+				if (currentChunk.time > 0) {
+					Chunks['delete'](currentChunk.time);
+				}
+			});
+	
+			keyboardCommand('ctrl+;', 'Rewind 1 second', function () {
+				setCurrentTime(getCurrentTime() - 1);
+			});
+	
+			keyboardCommand('ctrl+\'', 'Fast-forward 1 second', function () {
+				setCurrentTime(getCurrentTime() + 1);
+			});
+	
+			keyboardCommand('ctrl+n', 'Set chunk start time to current time', function () {
+				var chunk = getCurrentChunk();
+				Chunks.move(chunk, getCurrentTime());
+			});
+	
+			keyboardCommand('ctrl+/', 'Split chunk at cursor and current time', function () {
+				var currentInput = document.activeElement;
+				if (currentInput && currentInput.tagName === 'TEXTAREA' && currentInput.selectionStart === currentInput.selectionEnd) {
+					var text = currentInput.value;
+					var pos = currentInput.selectionStart;
+					var textBeforeCursor = text.substring(0, pos - 1).replace(/\s+$/, '');
+					var textAfterCursor = text.substring(pos).replace(/^\s+/, '');
+	
+					var currentChunk = getCurrentChunk();
+					Chunks.save(currentChunk.set('text', textBeforeCursor));
+	
+					var newChunk = Chunks.create({ time: getCurrentTime(), text: textAfterCursor, speaker: currentChunk.speaker });
+					Chunks.save(newChunk);
+				}
+			});
+	
+			keyboardCommand('ctrl+z', 'Super Undo', globalUndo);
+	
+			keyboardCommand('ctrl+r', 'Rename speaker', function () {
+				var speakers = DataCore.get('/speakers');
+				var chunk = getCurrentChunk();
+				var currentName = speakers.get(chunk.speaker);
+	
+				var wasPlaying = isPlaying();
+				pause();
+	
+				var newName = window.prompt('Enter the name of the current speaker:', currentName || '');
+	
+				if (wasPlaying) {
+					play();
+				}
+	
+				if (newName !== null) {
+					DataCore.set('/speakers', newName ? speakers.set(chunk.speaker, newName) : speakers['delete'](chunk.speaker));
+				}
+			});
+	
+			// So people can see what keys are being pressed (good for demos)
+			this.run('highlight active keyboard commands', commandWasRun.groupBy(function (keys) {
+				return keys;
+			}).map(function (observable) {
+				return observable.debounce(1000);
+			}).mergeAll()['do'](function (keys) {
+				return _this.setState({ activeCommands: _this.state.activeCommands.remove(keys) });
+			}));
+	
+			this.run('track visible preference', this.stateObserver('visible')['do'](function (visible) {
+				return localStorage.keyboard_shortcuts_visible = JSON.stringify(visible);
+			}));
+		},
+	
+		render: function render() {
+			var _this2 = this;
+	
+			if (this.state.visible) {
+				return React.createElement(
+					'table',
+					{ className: 'shortcuts' },
+					React.createElement(
+						'tbody',
+						null,
+						this.commands.entrySeq().map(function (_ref) {
+							var _ref2 = _slicedToArray(_ref, 2);
+	
+							var keys = _ref2[0];
+							var desc = _ref2[1];
+							return React.createElement(
+								'tr',
+								{ key: keys, className: 'shortcut ' + (_this2.state.activeCommands.has(keys) ? 'active' : 'inactive') },
+								React.createElement(
+									'td',
+									{ className: 'shortcut-key' },
+									keys.replace(/^ctrl\+/, 'control ')
+								),
+								React.createElement(
+									'td',
+									null,
+									'→   ',
+									desc
+								)
+							);
+						})
+					),
+					React.createElement(
+						'tbody',
+						null,
+						React.createElement(
+							'tr',
+							{ className: 'shortcut' },
+							React.createElement(
+								'td',
+								{ className: 'shortcut-key' },
+								'control 1-9'
+							),
+							React.createElement(
+								'td',
+								null,
+								'→   Set speaker for current chunk'
+							)
+						)
+					)
+				);
+			} else {
+				return React.createElement(
+					'div',
+					{ className: 'hidden-shortcuts' },
+					'Press control k to see the keyboard shortcuts'
+				);
+			}
+		}
+	});
+	
+	module.exports = CommandsView;
+
+/***/ },
+/* 53 */
+/*!*********************************!*\
+  !*** ./js/clipboard-button.jsx ***!
+  \*********************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(/*! react */ 15);
+	
+	var ClipboardButton = React.createClass({
+		displayName: 'ClipboardButton',
+	
+		componentDidMount: function componentDidMount() {
+			var button = React.findDOMNode(this.refs.copy);
+			var client = new ZeroClipboard(button);
+			client.on('copy', function (e) {
+				var clipboard = e.clipboardData;
+				var allText = Chunks.getAll().map(function (chunk) {
+					return chunk.text;
+				}).join('\n\n');
+				clipboard.setData('text/plain', allText);
+			});
+		},
+	
+		render: function render() {
+			return React.createElement(
+				'a',
+				{ className: 'copy-button', href: '', onClick: function (e) {
+						return e.preventDefault();
+					}, ref: 'copy' },
+				'Copy'
+			);
+		}
+	});
+	
+	module.exports = ClipboardButton;
+
+/***/ },
+/* 54 */
+/*!******************************!*\
+  !*** ./js/load-and-save.jsx ***!
+  \******************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Chunks = __webpack_require__(/*! chunks */ 19);
+	var Immutable = __webpack_require__(/*! immutable */ 9);
+	var DataCore = __webpack_require__(/*! data-core */ 18);
+	
+	function localStorageKeyForFile(file) {
+		return 'transcription_' + file.sha1;
+	}
+	
+	DataCore.observe('/file').filter(function (o) {
+		return o;
+	}).map(function (o) {
+		return o.toJS();
+	}).flatMapLatest(function (file) {
+		// We have a new file. Load data.
+		var saved = localStorage[localStorageKeyForFile(file)];
+		if (saved) {
+			try {
+				var parsed = JSON.parse(saved);
+				Chunks.set(Immutable.Seq(parsed.chunks).map(function (c) {
+					return Chunks.create(c);
+				}).toList());
+	
+				DataCore.set('/speakers', Immutable.Map(parsed.speakers));
+			} catch (e) {
+				console.error('error loading saved chunks for ' + file.sha1, e);
+				Chunks.reset();
+				DataCore.set('/speakers', Immutable.Map());
+			}
+		} else {
+			Chunks.reset();
+		}
+	
+		// Now, start auto-save running
+		return DataCore.observeMany({
+			chunks: '/chunks/all',
+			speakers: '/speakers'
+		}).debounce(1000)['do'](function (inputs) {
+			return localStorage[localStorageKeyForFile(file)] = JSON.stringify(inputs);
+		});
+	}).run('load and save');
 
 /***/ }
 /******/ ]);
