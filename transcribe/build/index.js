@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "796a1cc1eeef6e005c85";
+/******/ 	__webpack_require__.h = "bc06ab1f77727e522da5";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -64,34 +64,56 @@
 	DataCore.set('/__webpack_hash__', __webpack_require__.h);
 	var Chunks = __webpack_require__(/*! chunks */ 19);
 	
-	window.getPlayer = function () {
+	window.formatTime = function formatTime(time) {
+		var withoutFrac = Math.trunc(time);
+		var sec = ('0' + withoutFrac % 60).slice(-2);
+		var min = ('0' + Math.trunc(withoutFrac / 60 % 60)).slice(-2);
+		var hours = ('0' + Math.trunc(withoutFrac / 3600)).slice(-2);
+		var frac = ('0' + Math.trunc(time * 10)).slice(-1);
+	
+		return '' + hours + ':' + min + ':' + sec + '.' + frac;
+	};
+	
+	window.getPlayer = function getPlayer() {
 		return DataCore.get('/player');
 	};
 	
-	window.getCurrentTime = function () {
+	window.getCurrentTime = function getCurrentTime() {
 		return DataCore.get('/time');
 	};
 	
-	window.setCurrentTime = function (time) {
+	window.setCurrentTime = function setCurrentTime(time) {
 		var newTime = +Math.max(time, 0).toFixed(2);
 		getPlayer().currentTime = newTime; // assertion: this is the ONLY place that sets the current player's .currentTime property!
 		currentTimeHint.onNext(newTime);
 	};
 	
-	window.getCurrentChunk = function () {
+	window.getCurrentChunk = function getCurrentChunk() {
 		return Chunks.get(getCurrentTime());
 	};
 	
-	window.play = function () {
+	window.play = function play() {
 		getPlayer().play();
 	};
 	
-	window.pause = function () {
+	window.pause = function pause() {
 		getPlayer().pause();
 	};
 	
-	window.isPlaying = function () {
+	window.isPlaying = function isPlaying() {
 		return !getPlayer().paused;
+	};
+	
+	window.tryGetFromLocalStorage = function tryGetFromLocalStorage(key, defaultValue) {
+		if (!localStorage.hasOwnProperty(key)) {
+			return defaultValue;
+		}
+	
+		try {
+			return JSON.parse(localStorage[key]);
+		} catch (e) {
+			return defaultValue;
+		}
 	};
 	
 	var Sha1 = __webpack_require__(/*! js-sha1 */ 21);
@@ -237,7 +259,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(/*! ./../~/css-loader/lib/css-base.js */ 3)();
-	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .checkCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n  .chunks .speakerCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n    .chunks .speakerCol select {\n      border: 0px; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n    .chunks .editorCol textarea.editor {\n      font-family: 'Source Sans Pro';\n      width: 100%;\n      box-sizing: border-box;\n      min-height: 2em;\n      border: 0px;\n      font-size: 1em;\n      margin: 0px;\n      background-color: transparent;\n      resize: none;\n      outline: none;\n      padding: 0px; }\n  .chunks .timeCol {\n    vertical-align: top;\n    white-space: no-wrap;\n    padding-right: 1em;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em; }\n\n.loading {\n  background-color: rgba(255, 255, 255, 0.85);\n  z-index: 100000;\n  position: fixed;\n  top: 0px;\n  left: 0px;\n  right: 0px;\n  bottom: 0px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 4em; }\n\n.data-core-view {\n  margin-bottom: 1em; }\n  .data-core-view .top {\n    display: flex;\n    width: 100%; }\n  .data-core-view .value {\n    margin-top: 0.3em; }\n  .data-core-view .path-input {\n    flex: 1;\n    margin-left: 0.5em; }\n  .data-core-view table.child-values {\n    margin-top: 0.5em;\n    margin-bottom: 1.5em;\n    display: block;\n    cursor: pointer; }\n    .data-core-view table.child-values tr > td:first-child {\n      padding-right: 1em; }\n", ""]);
+	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .checkCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n  .chunks .speakerCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n    .chunks .speakerCol select {\n      border: 0px; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n    .chunks .editorCol textarea.editor {\n      font-family: 'Source Sans Pro';\n      width: 100%;\n      box-sizing: border-box;\n      min-height: 2em;\n      border: 0px;\n      font-size: 1em;\n      margin: 0px;\n      background-color: transparent;\n      resize: none;\n      outline: none;\n      padding: 0px; }\n  .chunks .timeCol {\n    vertical-align: top;\n    white-space: no-wrap;\n    padding-right: 1em;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em;\n  margin-bottom: 1.5em;\n  text-align: right; }\n  .copy-button .text {\n    font-size: 0.9em;\n    color: #00bb00;\n    padding-right: 0.5em; }\n  .copy-button .error {\n    font-size: 0.9em;\n    color: red;\n    padding-right: 0.5em; }\n  .copy-button .options {\n    font-size: 0.8em;\n    color: #999;\n    margin-top: 0.2em; }\n\n.loading {\n  background-color: rgba(255, 255, 255, 0.85);\n  z-index: 100000;\n  position: fixed;\n  top: 0px;\n  left: 0px;\n  right: 0px;\n  bottom: 0px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 4em; }\n\n.data-core-view {\n  margin-bottom: 1em; }\n  .data-core-view .top {\n    display: flex;\n    width: 100%; }\n  .data-core-view .value {\n    margin-top: 0.3em; }\n  .data-core-view .path-input {\n    flex: 1;\n    margin-left: 0.5em; }\n  .data-core-view table.child-values {\n    margin-top: 0.5em;\n    margin-bottom: 1.5em;\n    display: block;\n    cursor: pointer; }\n    .data-core-view table.child-values tr > td:first-child {\n      padding-right: 1em; }\n", ""]);
 
 /***/ },
 /* 3 */
@@ -38127,16 +38149,6 @@
 	var Rx = __webpack_require__(/*! rx */ 11);
 	var Chunks = __webpack_require__(/*! chunks */ 19);
 	
-	function formatTime(time) {
-		var withoutFrac = Math.trunc(time);
-		var sec = ('0' + withoutFrac % 60).slice(-2);
-		var min = ('0' + Math.trunc(withoutFrac / 60 % 60)).slice(-2);
-		var hours = ('0' + Math.trunc(withoutFrac / 3600)).slice(-2);
-		var frac = ('0' + Math.trunc(time * 10)).slice(-1);
-	
-		return '' + hours + ':' + min + ':' + sec + '.' + frac;
-	}
-	
 	var ChunkView = React.createClass({
 		displayName: 'ChunkView',
 	
@@ -38419,18 +38431,6 @@
 	var DataCore = __webpack_require__(/*! data-core */ 18);
 	var Chunks = __webpack_require__(/*! chunks */ 19);
 	
-	function tryGetFromLocalStorage(key, defaultValue) {
-		if (!localStorage.hasOwnProperty(key)) {
-			return defaultValue;
-		}
-	
-		try {
-			return JSON.parse(localStorage[key]);
-		} catch (e) {
-			return defaultValue;
-		}
-	}
-	
 	var CommandsView = React.createClass({
 		displayName: 'CommandsView',
 	
@@ -38655,31 +38655,136 @@
 
 	'use strict';
 	
+	function _defineProperty(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); }
+	
 	var React = __webpack_require__(/*! react */ 15);
+	var ReactUtils = __webpack_require__(/*! react-utils */ 17);
+	var Rx = __webpack_require__(/*! rx */ 11);
+	var DataCore = __webpack_require__(/*! data-core */ 18);
+	var Chunks = __webpack_require__(/*! chunks */ 19);
 	
 	var ClipboardButton = React.createClass({
 		displayName: 'ClipboardButton',
 	
+		mixins: [ReactUtils.RxMixin],
+	
+		getInitialState: function getInitialState() {
+			return {
+				withSpeakers: tryGetFromLocalStorage('copy_withSpeakers', true),
+				withTimestamps: tryGetFromLocalStorage('copy_withTimestamps', true)
+			};
+		},
+	
+		componentWillMount: function componentWillMount() {
+			var _this = this;
+	
+			this.flashMessage = new Rx.Subject();
+	
+			this.run('handle flash message', this.flashMessage.flatMapLatest(function (msg) {
+				_this.setState({ msg: msg });
+				return Rx.Observable.timer(2000)['do'](function () {
+					return _this.setState({ msg: null });
+				});
+			}));
+		},
+	
 		componentDidMount: function componentDidMount() {
+			var _this2 = this;
+	
 			var button = React.findDOMNode(this.refs.copy);
 			var client = new ZeroClipboard(button);
 			client.on('copy', function (e) {
-				var clipboard = e.clipboardData;
-				var allText = Chunks.getAll().map(function (chunk) {
-					return chunk.text;
-				}).join('\n\n');
-				clipboard.setData('text/plain', allText);
+				try {
+					var lastSpeaker;
+	
+					(function () {
+						var clipboard = e.clipboardData;
+						var speakers = DataCore.get('/speakers');
+						lastSpeaker = null;
+	
+						var allText = Chunks.getAll().map(function (chunk) {
+							var text = '';
+							if (_this2.state.withSpeakers && chunk.speaker != lastSpeaker) {
+								text = speakers.get(chunk.speaker) + '\n';
+								lastSpeaker = chunk.speaker;
+							}
+							if (_this2.state.withTimestamps) {
+								text += '[' + formatTime(chunk.time) + '] ';
+							}
+							return text + chunk.text;
+						}).join('\n\n');
+						clipboard.setData('text/plain', allText);
+						_this2.flashMessage.onNext({ text: 'Copied successfully!' });
+					})();
+				} catch (e) {
+					console.error(e);
+					_this2.flashMessage.onNext({ error: String(e) });
+				}
 			});
 		},
 	
 		render: function render() {
+			var _this3 = this;
+	
+			var msg = this.state && this.state.msg;
 			return React.createElement(
-				'a',
-				{ className: 'copy-button', href: '', onClick: function (e) {
-						return e.preventDefault();
-					}, ref: 'copy' },
-				'Copy'
+				'div',
+				{ className: 'copy-button' },
+				msg && msg.error && React.createElement(
+					'span',
+					{ className: 'error' },
+					msg.error
+				),
+				msg && msg.text && React.createElement(
+					'span',
+					{ className: 'text' },
+					msg.text
+				),
+				React.createElement(
+					'button',
+					{ onClick: function (e) {
+							return e.preventDefault();
+						}, ref: 'copy' },
+					'Copy'
+				),
+				React.createElement(
+					'div',
+					{ className: 'options' },
+					React.createElement(
+						'div',
+						null,
+						React.createElement(
+							'label',
+							null,
+							'copy with speakers',
+							React.createElement('input', { type: 'checkbox',
+								checked: this.state.withSpeakers,
+								onChange: function (e) {
+									return _this3.setSetting('withSpeakers', e.target.checked);
+								} })
+						)
+					),
+					React.createElement(
+						'div',
+						null,
+						React.createElement(
+							'label',
+							null,
+							'copy with timestamps',
+							React.createElement('input', { type: 'checkbox',
+								checked: this.state.withTimestamps,
+								onChange: function (e) {
+									return _this3.setSetting('withTimestamps', e.target.checked);
+								} })
+						)
+					)
+				)
 			);
+		},
+	
+		setSetting: function setSetting(name, value) {
+			this.setState(_defineProperty({}, name, value));
+			localStorage['copy_' + name] = value;
 		}
 	});
 	
