@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "bc06ab1f77727e522da5";
+/******/ 	__webpack_require__.h = "68380e70eadb1762a167";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -33717,49 +33717,9 @@
 	
 	    return pathProvider.disposable;
 	  };
-	
-	  // self.bindToLocalStorage = (path, key, parser) =>
-	  //   Rx.Observable.defer(() => {
-	  //     const value = localStorage[key];
-	  //     self.set(path, parser ? parser(value) : value);
-	  //     return self.observe(path)
-	  //   })
-	  //   .do(value => {
-	  //     if (value === undefined){
-	  //       delete localStorage[key];
-	  //     }
-	  //     else {
-	  //       localStorage[key] = value;
-	  //     }
-	  //   })
-	  //   .run('Bind DataCore[' + path + '] to localStorage.' + key);
 	}();
 	
 	module.exports = DataCore;
-	
-	// Easy DFSing:
-	//
-	// immutableDFS = (root, path=Immutable.List()) =>
-	//   Immutable.Seq(root)
-	//   .toKeyedSeq()
-	//   .flatMap((value, key)=>
-	//     !Immutable.Iterable.isIterable(value)
-	//     ? Immutable.Seq.of([path.push(key), value])
-	//     : immutableDFS(value, path.push(key))
-	//   );
-	//
-	// DataCore.observe('/')
-	// .skip(10)
-	// .take(1)
-	// .do(data =>
-	//   immutableDFS(data)
-	//   .filterNot((value, key) => Immutable.is(key.take(2), Immutable.Seq.of('current', 'push')))
-	//   .filterNot((value, key) => key.first() === 'users')
-	//   .forEach((value, key) =>
-	//     console.log('/'+key.toJS().join('/'), value)
-	//   )
-	// )
-	// .run();
 
 /***/ },
 /* 19 */
