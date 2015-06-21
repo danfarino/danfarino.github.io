@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "48435857e8f01bcd6fb1";
+/******/ 	__webpack_require__.h = "796a1cc1eeef6e005c85";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -237,7 +237,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(/*! ./../~/css-loader/lib/css-base.js */ 3)();
-	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .checkCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n  .chunks .speakerCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n    .chunks .speakerCol select {\n      border: 0px; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n    .chunks .editorCol textarea.editor {\n      font-family: 'Source Sans Pro';\n      width: 100%;\n      box-sizing: border-box;\n      min-height: 2em;\n      border: 0px;\n      font-size: 1em;\n      margin: 0px;\n      background-color: transparent;\n      resize: none;\n      outline: none;\n      padding: 0px; }\n  .chunks .timeCol {\n    vertical-align: top;\n    white-space: no-wrap;\n    padding-right: 1em;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em; }\n\n.loading {\n  background-color: rgba(255, 255, 255, 0.85);\n  z-index: 100000;\n  position: fixed;\n  top: 0px;\n  left: 0px;\n  right: 0px;\n  bottom: 0px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 4em; }\n\n.data-core-view {\n  margin-bottom: 1em; }\n  .data-core-view .top {\n    display: flex;\n    width: 100%; }\n  .data-core-view .path-input {\n    flex: 1;\n    margin-left: 0.5em; }\n  .data-core-view table.child-values {\n    margin-top: 0.5em;\n    cursor: pointer; }\n    .data-core-view table.child-values tr > td:first-child {\n      padding-right: 1em; }\n", ""]);
+	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .checkCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n  .chunks .speakerCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n    .chunks .speakerCol select {\n      border: 0px; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n    .chunks .editorCol textarea.editor {\n      font-family: 'Source Sans Pro';\n      width: 100%;\n      box-sizing: border-box;\n      min-height: 2em;\n      border: 0px;\n      font-size: 1em;\n      margin: 0px;\n      background-color: transparent;\n      resize: none;\n      outline: none;\n      padding: 0px; }\n  .chunks .timeCol {\n    vertical-align: top;\n    white-space: no-wrap;\n    padding-right: 1em;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em; }\n\n.loading {\n  background-color: rgba(255, 255, 255, 0.85);\n  z-index: 100000;\n  position: fixed;\n  top: 0px;\n  left: 0px;\n  right: 0px;\n  bottom: 0px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 4em; }\n\n.data-core-view {\n  margin-bottom: 1em; }\n  .data-core-view .top {\n    display: flex;\n    width: 100%; }\n  .data-core-view .value {\n    margin-top: 0.3em; }\n  .data-core-view .path-input {\n    flex: 1;\n    margin-left: 0.5em; }\n  .data-core-view table.child-values {\n    margin-top: 0.5em;\n    margin-bottom: 1.5em;\n    display: block;\n    cursor: pointer; }\n    .data-core-view table.child-values tr > td:first-child {\n      padding-right: 1em; }\n", ""]);
 
 /***/ },
 /* 3 */
@@ -33698,7 +33698,7 @@
 	
 	  // self.bindToLocalStorage = (path, key, parser) =>
 	  //   Rx.Observable.defer(() => {
-	  //     var value = localStorage[key];
+	  //     const value = localStorage[key];
 	  //     self.set(path, parser ? parser(value) : value);
 	  //     return self.observe(path)
 	  //   })
@@ -37977,8 +37977,11 @@
 					),
 					React.createElement('input', { className: 'path-input', type: 'text', value: this.state.path, onChange: function (e) {
 							return _this2.setState({ path: e.target.value || '/' });
-						} }),
-					'  →  ',
+						} })
+				),
+				React.createElement(
+					'div',
+					{ className: 'value' },
 					describeValue(value)
 				),
 				this.state.error && React.createElement(
