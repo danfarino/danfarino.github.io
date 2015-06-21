@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "ca7b61e846e22794841b";
+/******/ 	__webpack_require__.h = "abf6f191ca730a680cbb";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -38540,10 +38540,6 @@
 				return observable.debounce(1000);
 			}).mergeAll()['do'](function (keys) {
 				return _this.setState({ activeCommands: _this.state.activeCommands.remove(keys) });
-			}));
-	
-			this.run('track visible preference', this.stateObserver('visible')['do'](function (visible) {
-				return localStorage.keyboard_shortcuts_visible = JSON.stringify(visible);
 			}));
 		},
 	
