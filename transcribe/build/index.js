@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "68380e70eadb1762a167";
+/******/ 	__webpack_require__.h = "5fe24c74ca9d12ef3bc1";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -38631,7 +38631,7 @@
 		getInitialState: function getInitialState() {
 			return {
 				withSpeakers: tryGetFromLocalStorage('copy_withSpeakers', true),
-				withTimestamps: tryGetFromLocalStorage('copy_withTimestamps', true)
+				withTimestamps: tryGetFromLocalStorage('copy_withTimestamps', false)
 			};
 		},
 	
