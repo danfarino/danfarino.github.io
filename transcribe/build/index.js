@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "4dc02e3a7a3523d41b5b";
+/******/ 	__webpack_require__.h = "9e98013f410f95fcaf37";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -38342,7 +38342,8 @@
 			this.observeIntoState({
 				frames: DataCore.observe('/current/file').flatMapLatest(DataCore.observeMany({
 					chunks: '/chunks/all',
-					speakers: '/speakers'
+					speakers: '/speakers',
+					settings: '/settings'
 				}).eventLoopDebounce().map(function (o) {
 					return Immutable.Map(o);
 				}).map(function (frame) {
@@ -38370,6 +38371,7 @@
 	
 				Chunks.set(frame.get('chunks'));
 				DataCore.set('/speakers', frame.get('speakers'));
+				DataCore.set('/settings', frame.get('settings'));
 			}
 		}
 	});
