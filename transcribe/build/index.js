@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "9e98013f410f95fcaf37";
+/******/ 	__webpack_require__.h = "20b1bf50b1e303d5ac54";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -38128,8 +38128,10 @@
 			Rx.Observable.just(true).observeOn(Rx.Scheduler.timeout).startWith(true))), Rx.Observable.fromEvent(window, 'resize'))['do'](function () {
 				var textarea = React.findDOMNode(_this.refs.textarea);
 				if (textarea) {
+					var oldScrollY = window.scrollY;
 					textarea.style.height = '2em';
 					textarea.style.height = '' + textarea.scrollHeight + 'px';
+					window.scrollTo(window.scrollX, oldScrollY);
 				}
 			}));
 		},
@@ -38449,12 +38451,21 @@
 				play();
 			});
 	
-			keyboardCommand('ctrl+s', 'Stop playing', pause);
+			keyboardCommand('ctrl+s', 'Pause/unpause', function () {
+				if (isPlaying()) {
+					pause();
+				} else {
+					play();
+				}
+			});
 	
 			keyboardCommand('ctrl+enter', 'Create new chunk at the current time', function () {
 				var chunk = getCurrentChunk();
-				var newChunk = Chunks.create({ time: getCurrentTime(), speaker: chunk.speaker });
-				Chunks.save(newChunk);
+				var currentTime = getCurrentTime();
+				if (chunk.time !== currentTime) {
+					var newChunk = Chunks.create({ time: currentTime, speaker: chunk.speaker });
+					Chunks.save(newChunk);
+				}
 			});
 	
 			keyboardCommand('ctrl+[', 'Move current chunk back ½ second', function () {
