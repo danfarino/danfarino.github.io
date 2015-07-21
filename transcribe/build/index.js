@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "927ba5f941571fb92e9f";
+/******/ 	__webpack_require__.h = "7b7426a1fdc72cd78495";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -38362,7 +38362,7 @@
 						React.createElement(
 							'li',
 							null,
-							'This program was tested in Chrome on Mac. It may not work well in other browsers. Use Chrome for best results.'
+							'This program was tested in Chrome on a Mac. It may not work well in other browsers. Use Chrome for best results.'
 						),
 						React.createElement(
 							'li',
