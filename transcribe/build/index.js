@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "2c82050060d1365cf47a";
+/******/ 	__webpack_require__.h = "927ba5f941571fb92e9f";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -351,7 +351,7 @@
 	
 	
 	// module
-	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.player {\n  display: flex; }\n  .player .help-button {\n    margin-left: 1em; }\n\n.help {\n  border: 1px solid #ccc;\n  padding: 1em;\n  padding-top: 1.1em;\n  margin-top: 1em;\n  margin-bottom: 0.5em; }\n  .help .important {\n    color: blue;\n    font-size: 1.2em; }\n  .help ul {\n    padding-left: 1.5em;\n    margin: 0px;\n    margin-top: 1em; }\n    .help ul li {\n      padding-bottom: 0.35em; }\n  .help .copyright {\n    color: #777;\n    margin-top: 1em;\n    font-size: 0.8em;\n    text-align: right; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .checkCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n  .chunks .speakerCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n    .chunks .speakerCol select {\n      border: 0px; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n    .chunks .editorCol textarea.editor {\n      font-family: 'Source Sans Pro';\n      width: 100%;\n      box-sizing: border-box;\n      border: 0px;\n      font-size: 1em;\n      margin: 0px;\n      background-color: transparent;\n      resize: none;\n      outline: none;\n      padding: 0px; }\n  .chunks .timeCol {\n    vertical-align: top;\n    white-space: no-wrap;\n    padding-right: 1em;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em;\n  margin-bottom: 1.5em;\n  text-align: right; }\n  .copy-button .text {\n    font-size: 0.9em;\n    color: #00bb00;\n    padding-right: 0.5em; }\n  .copy-button .error {\n    font-size: 0.9em;\n    color: red;\n    padding-right: 0.5em; }\n  .copy-button .options {\n    font-size: 0.8em;\n    color: #999;\n    margin-top: 0.2em; }\n\n.loading {\n  background-color: rgba(255, 255, 255, 0.85);\n  z-index: 100000;\n  position: fixed;\n  top: 0px;\n  left: 0px;\n  right: 0px;\n  bottom: 0px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 4em; }\n\n.data-core-view {\n  margin-bottom: 1em; }\n  .data-core-view .top {\n    display: flex;\n    width: 100%; }\n  .data-core-view .value {\n    margin-top: 0.3em; }\n  .data-core-view .path-input {\n    flex: 1;\n    margin-left: 0.5em; }\n  .data-core-view table.child-values {\n    margin-top: 0.5em;\n    margin-bottom: 1.5em;\n    display: block;\n    cursor: pointer; }\n    .data-core-view table.child-values tr > td:first-child {\n      padding-right: 1em; }\n", ""]);
+	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.player {\n  display: flex;\n  align-items: center; }\n  .player .help-button {\n    margin-left: 1em;\n    display: inline-block;\n    color: #0000c8 !important; }\n    .player .help-button:link, .player .help-button:visited {\n      text-decoration: none; }\n    .player .help-button:hover {\n      text-decoration: underline; }\n\n.help {\n  border: 1px solid #ccc;\n  padding: 1em;\n  padding-top: 1.1em;\n  margin-top: 1em;\n  margin-bottom: 0.5em; }\n  .help .important {\n    color: blue;\n    font-weight: bold;\n    font-size: 1.2em; }\n  .help ul {\n    padding-left: 1.5em;\n    margin: 0px;\n    margin-top: 1em; }\n    .help ul li {\n      padding-bottom: 0.35em; }\n  .help .copyright {\n    color: #777;\n    margin-top: 1em;\n    margin-right: 0.2em;\n    font-size: 0.8em;\n    text-align: right; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .checkCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n  .chunks .speakerCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n    .chunks .speakerCol select {\n      border: 0px; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n    .chunks .editorCol textarea.editor {\n      font-family: 'Source Sans Pro';\n      width: 100%;\n      box-sizing: border-box;\n      border: 0px;\n      font-size: 1em;\n      margin: 0px;\n      background-color: transparent;\n      resize: none;\n      outline: none;\n      padding: 0px; }\n  .chunks .timeCol {\n    vertical-align: top;\n    white-space: no-wrap;\n    padding-right: 1em;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em;\n  margin-bottom: 1.5em;\n  text-align: right; }\n  .copy-button .text {\n    font-size: 0.9em;\n    color: #00bb00;\n    padding-right: 0.5em; }\n  .copy-button .error {\n    font-size: 0.9em;\n    color: red;\n    padding-right: 0.5em; }\n  .copy-button .options {\n    font-size: 0.8em;\n    color: #999;\n    margin-top: 0.2em; }\n\n.loading {\n  background-color: rgba(255, 255, 255, 0.85);\n  z-index: 100000;\n  position: fixed;\n  top: 0px;\n  left: 0px;\n  right: 0px;\n  bottom: 0px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 4em; }\n\n.data-core-view {\n  margin-bottom: 1em; }\n  .data-core-view .top {\n    display: flex;\n    width: 100%; }\n  .data-core-view .value {\n    margin-top: 0.3em; }\n  .data-core-view .path-input {\n    flex: 1;\n    margin-left: 0.5em; }\n  .data-core-view table.child-values {\n    margin-top: 0.5em;\n    margin-bottom: 1.5em;\n    display: block;\n    cursor: pointer; }\n    .data-core-view table.child-values tr > td:first-child {\n      padding-right: 1em; }\n", ""]);
 	
 	// exports
 
@@ -38354,7 +38354,7 @@
 					React.createElement(
 						'div',
 						{ className: 'important' },
-						'IMPORTANT: All data is saved in your web browser. Therefore, if you clear your browser data, you will lose your saved transcriptions.'
+						'IMPORTANT: All data is saved in your web browser on your computer. Therefore, if you clear your browser data, you will lose your saved transcriptions.'
 					),
 					React.createElement(
 						'ul',
@@ -38362,7 +38362,7 @@
 						React.createElement(
 							'li',
 							null,
-							'This program was tested in Chrome. It may not work well in other browsers. Use Chrome for best results.'
+							'This program was tested in Chrome on Mac. It may not work well in other browsers. Use Chrome for best results.'
 						),
 						React.createElement(
 							'li',
@@ -38387,7 +38387,7 @@
 						React.createElement(
 							'li',
 							null,
-							'The start of each chunk is synchronized with the audio, so as you click between chunks, the audio is automatically positioned to the start of the chunk.'
+							'The start of each chunk is synchronized with the audio, so as you click/tab between chunks, the audio is automatically positioned to the start of the chunk.'
 						),
 						React.createElement(
 							'li',
