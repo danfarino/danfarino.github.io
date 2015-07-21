@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "1cabcb149fc4cb8a9248";
+/******/ 	__webpack_require__.h = "23dea4e28a437e59bb95";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -38397,12 +38397,22 @@
 						React.createElement(
 							'li',
 							null,
+							'You do not have to transcribe the entire file from start to finish. Feel free to fast-forward to any part of the audio, create a new chunk there, and start transcribing.'
+						),
+						React.createElement(
+							'li',
+							null,
 							'To get your transcription out of this program, click the "Copy" button. Then, just paste into whatever other writing program you\'re using.'
 						),
 						React.createElement(
 							'li',
 							null,
 							'In order to maximize productivity, everything is done with keyboard shortcuts. Once you load an audio file, press "control k" to see the shortcuts.'
+						),
+						React.createElement(
+							'li',
+							null,
+							'Enjoy!'
 						)
 					),
 					React.createElement(
