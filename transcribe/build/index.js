@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "dc6afe6c454b69ff3ffe";
+/******/ 	__webpack_require__.h = "1cabcb149fc4cb8a9248";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -351,7 +351,7 @@
 	
 	
 	// module
-	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .checkCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n  .chunks .speakerCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n    .chunks .speakerCol select {\n      border: 0px; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n    .chunks .editorCol textarea.editor {\n      font-family: 'Source Sans Pro';\n      width: 100%;\n      box-sizing: border-box;\n      border: 0px;\n      font-size: 1em;\n      margin: 0px;\n      background-color: transparent;\n      resize: none;\n      outline: none;\n      padding: 0px; }\n  .chunks .timeCol {\n    vertical-align: top;\n    white-space: no-wrap;\n    padding-right: 1em;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em;\n  margin-bottom: 1.5em;\n  text-align: right; }\n  .copy-button .text {\n    font-size: 0.9em;\n    color: #00bb00;\n    padding-right: 0.5em; }\n  .copy-button .error {\n    font-size: 0.9em;\n    color: red;\n    padding-right: 0.5em; }\n  .copy-button .options {\n    font-size: 0.8em;\n    color: #999;\n    margin-top: 0.2em; }\n\n.loading {\n  background-color: rgba(255, 255, 255, 0.85);\n  z-index: 100000;\n  position: fixed;\n  top: 0px;\n  left: 0px;\n  right: 0px;\n  bottom: 0px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 4em; }\n\n.data-core-view {\n  margin-bottom: 1em; }\n  .data-core-view .top {\n    display: flex;\n    width: 100%; }\n  .data-core-view .value {\n    margin-top: 0.3em; }\n  .data-core-view .path-input {\n    flex: 1;\n    margin-left: 0.5em; }\n  .data-core-view table.child-values {\n    margin-top: 0.5em;\n    margin-bottom: 1.5em;\n    display: block;\n    cursor: pointer; }\n    .data-core-view table.child-values tr > td:first-child {\n      padding-right: 1em; }\n", ""]);
+	exports.push([module.id, "html {\n  font-family: 'Source Sans Pro'; }\n\n.editor {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%; }\n\naudio {\n  width: 100%; }\n\naudio::-webkit-media-controls-enclosure {\n  max-width: 100%; }\n\n.player {\n  display: flex; }\n  .player .help-button {\n    margin-left: 1em; }\n\n.help {\n  border: 1px solid #ccc;\n  padding: 0.8em;\n  margin-top: 0.5em;\n  margin-bottom: 0.5em; }\n  .help .important {\n    color: blue; }\n  .help ul {\n    padding-left: 1.5em;\n    margin: 0px;\n    margin-top: 0.5em; }\n    .help ul li {\n      padding-bottom: 0.2em; }\n  .help .copyright {\n    color: #777;\n    margin-top: 1em;\n    font-size: 0.8em; }\n\n.chunks {\n  width: 100%;\n  box-sizing: border-box;\n  border-collapse: collapse; }\n  .chunks .checkCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n  .chunks .speakerCol {\n    vertical-align: top;\n    padding-right: 0.5em; }\n    .chunks .speakerCol select {\n      border: 0px; }\n  .chunks .editorCol {\n    vertical-align: top;\n    width: 99%;\n    padding: 0.3em; }\n    .chunks .editorCol textarea.editor {\n      font-family: 'Source Sans Pro';\n      width: 100%;\n      box-sizing: border-box;\n      border: 0px;\n      font-size: 1em;\n      margin: 0px;\n      background-color: transparent;\n      resize: none;\n      outline: none;\n      padding: 0px; }\n  .chunks .timeCol {\n    vertical-align: top;\n    white-space: no-wrap;\n    padding-right: 1em;\n    color: #999;\n    padding: 0.3em;\n    padding-right: 0.8em; }\n\n.chunk.current {\n  background-color: #f5fff5; }\n\n.chunk.done textarea.editor {\n  color: #999; }\n\n.shortcut-key {\n  font-family: Inconsolata; }\n\n.shortcuts {\n  border-collapse: collapse;\n  padding-top: 0.5em;\n  padding-bottom: 1em;\n  margin-top: 0.8em;\n  margin-bottom: 1.2em; }\n  .shortcuts tr td:first-child {\n    padding-right: 1em; }\n  .shortcuts .shortcut.inactive {\n    transition: background-color 1s; }\n  .shortcuts .shortcut.active {\n    background-color: #ffff55; }\n\n.hidden-shortcuts {\n  color: #999;\n  padding-top: 0.5em;\n  padding-bottom: 1em; }\n\n.current-file-info {\n  color: #999;\n  margin-top: 0.8em; }\n\n.copy-button {\n  float: right;\n  margin-top: 0.8em;\n  margin-bottom: 1.5em;\n  text-align: right; }\n  .copy-button .text {\n    font-size: 0.9em;\n    color: #00bb00;\n    padding-right: 0.5em; }\n  .copy-button .error {\n    font-size: 0.9em;\n    color: red;\n    padding-right: 0.5em; }\n  .copy-button .options {\n    font-size: 0.8em;\n    color: #999;\n    margin-top: 0.2em; }\n\n.loading {\n  background-color: rgba(255, 255, 255, 0.85);\n  z-index: 100000;\n  position: fixed;\n  top: 0px;\n  left: 0px;\n  right: 0px;\n  bottom: 0px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 4em; }\n\n.data-core-view {\n  margin-bottom: 1em; }\n  .data-core-view .top {\n    display: flex;\n    width: 100%; }\n  .data-core-view .value {\n    margin-top: 0.3em; }\n  .data-core-view .path-input {\n    flex: 1;\n    margin-left: 0.5em; }\n  .data-core-view table.child-values {\n    margin-top: 0.5em;\n    margin-bottom: 1.5em;\n    display: block;\n    cursor: pointer; }\n    .data-core-view table.child-values tr > td:first-child {\n      padding-right: 1em; }\n", ""]);
 	
 	// exports
 
@@ -38281,6 +38281,12 @@
 	
 		mixins: [ReactUtils.RxMixin, React.addons.LinkedStateMixin],
 	
+		getInitialState: function getInitialState() {
+			return {
+				showHelp: false
+			};
+		},
+	
 		componentDidMount: function componentDidMount() {
 			var _this = this;
 	
@@ -38331,9 +38337,86 @@
 		render: function render() {
 			return React.createElement(
 				'div',
-				{ className: 'player' },
-				React.createElement('audio', { controls: true, ref: 'player' })
+				null,
+				React.createElement(
+					'div',
+					{ className: 'player' },
+					React.createElement('audio', { controls: true, ref: 'player' }),
+					React.createElement(
+						'a',
+						{ href: '', className: 'help-button', onClick: this.toggleHelp },
+						'Help'
+					)
+				),
+				this.state.showHelp && React.createElement(
+					'div',
+					{ className: 'help' },
+					React.createElement(
+						'div',
+						{ className: 'important' },
+						'IMPORTANT: All data is saved in your web browser. Therefore, if you clear your browser data, you will lose your saved transcriptions.'
+					),
+					React.createElement(
+						'ul',
+						null,
+						React.createElement(
+							'li',
+							null,
+							'This program was tested in Chrome. It may not work well in other browsers. Use Chrome for best results.'
+						),
+						React.createElement(
+							'li',
+							null,
+							'Drag an audio file into the page to get started.'
+						),
+						React.createElement(
+							'li',
+							null,
+							'Everything is saved automatically as you type. You will not lose any information if you close the browser window.'
+						),
+						React.createElement(
+							'li',
+							null,
+							'To pick up where you left off last time, just drag the same file back into the page.'
+						),
+						React.createElement(
+							'li',
+							null,
+							'The idea is to cut the file up into small chunks, typically around 30 seconds each.'
+						),
+						React.createElement(
+							'li',
+							null,
+							'The start of each chunk is synchronized with the audio, so as you click between chunks, the audio is automatically positioned to the start of the chunk.'
+						),
+						React.createElement(
+							'li',
+							null,
+							'The audio will pause when you start typing. When you stop typing, the audio will continue (with a small overlap so you can keep your bearings).'
+						),
+						React.createElement(
+							'li',
+							null,
+							'To get your transcription out of this program, click the "Copy" button. Then, just paste into whatever other writing program you\'re using.'
+						),
+						React.createElement(
+							'li',
+							null,
+							'In order to maximize productivity, everything is done with keyboard shortcuts. Once you load an audio file, press "control k" to see the shortcuts.'
+						)
+					),
+					React.createElement(
+						'div',
+						{ className: 'copyright' },
+						'Copyright © 2015 Dan Farino. All Rights Reserved.'
+					)
+				)
 			);
+		},
+	
+		toggleHelp: function toggleHelp(e) {
+			this.setState({ showHelp: !this.state.showHelp });
+			e.preventDefault();
 		}
 	});
 	
@@ -38549,7 +38632,7 @@
 				}
 			});
 	
-			keyboardCommand('ctrl+z', 'Super Undo', globalUndo);
+			keyboardCommand('ctrl+z', 'Undo the last change you made anywhere in the program (covers more cases than regular undo)', globalUndo);
 	
 			keyboardCommand('ctrl+r', 'Rename speaker', function () {
 				var speakers = DataCore.get('/speakers');
