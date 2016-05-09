@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>React JS</title>
+		<style>
+			body {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+h1, h2, h3 {
+	font-weight: 400;
+	margin-bottom: 0;
+}
+.remark-slide-content h1 { font-size: 3.5em; }
+.remark-slide-content h2 { font-size: 3em; }
+.remark-slide-content h3 { font-size: 1.6em; }
+.footnote {
+	position: absolute;
+	bottom: 3em;
+}
+li {
+	margin-bottom: 1em;
+}
+
+li p { line-height: 1.25em; }
+.red { color: #fa0000; }
+.large { font-size: 2em; }
+a, a > code {
+	color: rgb(249, 38, 114);
+	text-decoration: none;
+}
+code {
+	background: none repeat scroll 0 0 #F8F8FF;
+  border: 1px solid #DEDEDE;
+  border-radius: 3px 	;
+  padding: 0 0.2em;
+}
+.remark-code, .remark-inline-code { font-family: "Bitstream Vera Sans Mono", "Courier", monospace; }
+.remark-code-line-highlighted     { background-color: #373832; }
+.pull-left {
+	float: left;
+	width: 47%;
+}
+.pull-right {
+	float: right;
+	width: 47%;
+}
+.pull-right ~ p {
+	clear: both;
+}
+#slideshow .slide .content code {
+	font-size: 0.8em;
+}
+#slideshow .slide .content pre code {
+	font-size: 0.9em;
+	padding: 15px;
+}
+.main-title, .title {
+	background: #272822;
+	color: #777872;
+	text-shadow: 0 0 20px #333;
+}
+.title h1, .title h2, .main-title h1, .main-title h2 {
+	color: #f3f3f3;
+	line-height: 0.8em;
+}
+/* Custom */
+.remark-code {
+	display: block;
+	padding: 0.5em;
+}
+
+		</style>
+	</head>
+	<body>
+		<textarea id="source">
+# React JS
+
+May 9, 2016
+
+by Dan Farino
+
+
+---
+
+## The UI Dream
+
+* You have a simple data structure representing the state of your UI.
+* The DOM updates automatically to remain in perfect sync with the state data.
+
+--
+
+This seems to be one of those problems where there isn't really a perfect answer. Analogous to creating a flat world map from a globe. There are many ways to flatten it out. It usually looks good in the middle, but out towards the edges it's always distorted to some degree.
+
+---
+
+## How to the various UI frameworks try to achieve the dream?
+
+--
+
+### There seems to be one constant in any solution:
+
+At some point in any solution is going to be a "diff" process, which means taking a new version of something and comparing it against the previous version of that thing.
+
+---
+
+## Backbone, jQuery or plain JavaScript
+
+--
+
+### "You're on your own."
+
+--
+
+When you change your state data, you're also responsible for updating the corresponding DOM nodes.
+
+It's up to you to figure out the granularity of the update you make.
+
+The more granular you try to make it, the uglier your code becomes.
+
+**Diff: manual**
+
+---
+
+## Knockout JS
+
+--
+
+### "Use special observable data instead of plain data."
+
+--
+
+Instead of working with standard JavaScript objects and arrays, Knockout needs you to use special observable data structures.
+
+When you update those observable data structures, Knockout updates the DOM automatically. 
+
+**Diff: state data is automatically diffed**
+
+---
+
+
+## Angular JS
+
+--
+
+### "Use dirty-checking to detect changes in the state data."
+
+--
+
+Angular needs you to change your data during specific windows of time:
+
+* either during an Angular-generated callback
+* or by calling `scope.$apply`
+
+After your code changes the data, Angular checks all of the data against a saved copy of the previous version. If it finds any differences, it automatically updates the corresponding DOM nodes.
+
+**Diff: state data is automatically diffed**
+
+---
+
+## React
+
+--
+
+### "Don't try to detect changes in the data. Instead just re-render the entire UI every time the state data changes."
+
+--
+
+React's job is to create the illusion that you can re-render your entire app every time the state data changes.
+
+Part of creating this illusion is that it really doesn't update the entire DOM every time. It only updates the parts that are different.
+
+**Diff: DOM structure is automatically diffed**
+
+---
+
+
+# How does React work?
+
+---
+
+## JSX and Virtual DOM
+
+```javascript
+function getItem(thing){
+    return <li>{thing.name}</li>;
+}
+```
+
+* JSX is the name of the syntax.
+* JSX is optional.
+* The syntax is compiled into regular JavaScript code that emits "Virtual DOM elements".
+* "Virtual DOM" is not optional. It is a core part of React's rendering engine.
+
+---
+
+## JSX 
+
+Any good template language eventually evolves into a programming language (ahem, ColdFusion), so why not just use JavaScript as that language and be done with it?
+
+JSX makes it much easier to refactor and restructure your template code since you get to create normal JavaScript functions that you can use to compose your view. (This is especially true when you are using TypeScript.)
+
+---
+
+## JSX
+ 
+
+```javascript
+render(){
+    return <div>
+        {
+            this.state.people
+                .filter(person => person.age > 21)
+                .map(person =>
+                    <div>{
+                        person.nickName ||
+                        (person.firstName + ' ' + person.lastName)
+                    }</div>
+                )
+        }
+    </div>;
+}
+```
+
+---
+
+## JSX
+
+### Downsides:
+
+* Some HTML things are spelled differently in JSX, e.g.:
+
+```html
+    <div class='thing'/>
+    <div className='thing'/>
+```
+    
+
+```html
+    <div style='margin-top: 1px'/>
+    <div style={{ marginTop: '1px' }}/>
+```
+
+
+---
+
+## JSX
+
+The compiler (babel or tsc) removes the magic.
+
+Play with the [Babel REPL](https://babeljs.io/repl/) to get a feel for how straightforward the transformation is.
+
+```javascript
+return <div>
+    hello
+</div>;
+```
+
+becomes:
+
+```javascript
+return React.createElement(
+    "div",
+    null,
+    "hello"
+);
+```
+---
+
+## JSX
+
+The compiler (babel or tsc) removes the magic.
+
+Play with the [Babel REPL](https://babeljs.io/repl/) to get a feel for how straightforward the transformation is.
+
+```javascript
+return <div>
+    <blink className="subtle">hello</blink>
+</div>;
+```
+
+becomes:
+
+```javascript
+return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "blink",
+      { className: "subtle" },
+      "hello"
+    )
+  );
+```
+
+---
+
+## Virtual DOM
+
+**Important mental note:** "Virtual DOM" has absolutely nothing to do with the "Shadow DOM" used in Web Components (Polymer).
+
+
+---
+
+## Virtual DOM
+
+"Virtual DOM elements" are nothing mystical. It's just some normal JavaScript data (objects and arrays) that are shaped like your DOM.
+
+```html
+<div className="foo">{person.name}</div>
+```
+```javascript
+{
+    type: 'div',
+    props: {
+        className: 'foo',
+        children: [
+            person.name
+        ]
+    }
+}
+```
+
+---
+
+## Virtual DOM
+
+"Virtual DOM elements" are nothing mystical. It's just some normal JavaScript data (objects and arrays) that are shaped like your DOM.
+
+```html
+<div className="foo">{person.name}<hr /></div>
+```
+```javascript
+{
+    type: 'div',
+    props: {
+        className: 'foo',
+        children: [
+            person.name,
+            {
+                type: 'hr',
+                props: { }
+            } 
+        ]
+    }
+}
+```
+
+---
+
+## Virtual DOM
+
+Not just a React thing:
+
+* virtual-dom
+* Ember.js
+* Angular 2.0
+* Vue
+* Cycle.js
+    
+---
+
+## state and props
+
+
+In a nutshell:
+
+* props: is data that is passed to a child component by a parent component
+* state: is data that lives inside of a element and wasn't passed in by the parent element
+
+
+---
+
+# Can we play with some code already?
+
+https://jsfiddle.net/reactjs/69z2wepo/
+
+---
+
+# Why do I prefer React (for now)?
+
+---
+
+## vs. Backbone, jQuery or plain JavaScript
+
+* Anything is better than this when it comes to keeping the UI in sync with the data.
+* But this is probably the best for siturations where you want to eek out every ounce of bare-metal performance possible, or where you can't afford the memory overhead of a library like Angular or React (like on old mobile devices).
+
+---
+
+## vs. Knockout
+
+* JSX is better than HTML templates, especially if you are using TypeScript.
+* Working with special observable data structures is messy and not fun.
+* Because it doesn't use a vitual DOM, it is still prone to updating DOM nodes that don't need to be re-rendered. It is up to the developer to refactor the app in order to achieve more-precise DOM updates (yuck). 
+
+---
+
+## vs. Angular
+
+* Dirty-checking doesn't scale
+* JSX is better than HTML templates
+* In Angular it's hard to control the sequence of events in your program. You have do tricks like `setTimeout(..., 0)` to get code to run after the UI has been updated.
+
+---
+
+# The React Landscape
+
+---
+
+## State Management
+
+In general, you need some way to maintain the state data. There are several approaches out there right now.
+
+This is a hot issue currently. There are many approaches and, at present, there is no general consensus about what the best approach is.
+
+---
+
+### Redux
+
+Redux is very simple.
+
+Instead of modifying a data structure directly, you send messages to Redux and it will re-generate the state for you. React then re-renders the UI with the new state.
+
+If you like the "command pattern" then you'll probably like Redux.
+
+--
+
+Seems to be the front runner these days.
+
+--
+
+Redux offers "hot-reloading with Time Traveling", which (besides sounding awesome) means you can do automatic undo/redo with the ability to load new JavaScript code without reloading the app. 
+
+---
+
+### MobX
+
+Wrap the state data with "observable" behavior, so that when you change the state data, re-rendering is triggered automatically.
+
+--
+
+Basically, gets rid of some stuff you have to usually write manually in React:
+
+1. No need to call `setState`. Just use normal JavaScript code to mutate the state data.
+2. No need to use immutable data in order to achieve high performance.
+
+--
+
+Relative newcomer, but looks promising. 
+
+---
+
+
+## Other stuff I can't live without when doing React
+
+* Visual Studio Code
+* Typescript
+* npm
+* webpack, babel
+* [RxJS](https://github.com/Reactive-Extensions/RxJS) 4.x
+
+---
+
+## Other Libraries
+
+* [Icepick](https://github.com/aearly/icepick): nice little library for working with Immutable data. 
+* React Native: use everything you know about React to write native mobile apps. Very nice. 
+* Immutable JS. Good, but I found it tedious to use.
+
+---
+
+## Some things I haven't played with and know almost nothing about
+
+* Flux, in any detail except conceptually
+* Server-side rendering running the same code as the client ("isomorphic" applications)
+* Animation
+* Hot-reloading
+* Testing. I write very few tests.
+* react-router or any of the other router libraries
+
+---
+
+
+## Random Tips
+
+* Use type checking. Whether that is TypeScript or Flow, just use something.
+
+--
+
+* Get good at working with immutable data. Most importantly, develop your mental model until it becomes fluid and simple.
+
+    In fact, understanding how Git stores commits and trees is a great way to get a grip on immutable data concepts. If you "get" Git's data model, you'll have an advantage when it comes to modeling immutable data structures of your own.
+
+--
+
+* Get good at exploring new JavaScript libraries. Things are exploding compared to 10 years ago. Every different way to solve the problem is able to get momentum and become a contender.
+
+--
+
+* Get good at dealing with all kinds of versioning issues with npm. React is constantly being upgraded and there are many, many little npm packages that are all intricately connected. You will definitely encounter some breakage when you're constantly updating to the latest and greatest package versions.
+
+---
+
+## Little React details that are important to understand
+
+* Controlled inputs
+    * Takes a little getting used to but works well once you understand it.
+
+---
+
+## Little React details that are important to understand
+
+* Keys
+    * e.g. `<MyReactComponent key={o.id}/>`
+    * Know why it's almost always wrong to use array indexes as keys
+    * When the "props" going into a component change, understand the `key` attribute influences whether the element is removed and re-added vs re-used and sent updated props. (If the key is the same, the existing instance is re-used and the updates props are sent to the existing instance.)
+
+---
+
+## Little React details that are important to understand
+
+* Refs
+    * e.g. `<div ref={this.handleThisDiv}/>` where `handleThisDiv` is a function that gets called and passed the actual DOM element once it's been rendered.
+    * This is your escape hatch if you just want to work with a real DOM node and manipulate it with jQuery or D3, for example.
+
+		</textarea>
+		<script src="http://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
+		<script>
+			var slideshow = remark.create();
+		</script>
+		<script></script>
+	</body>
+</html>
