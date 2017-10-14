@@ -141,7 +141,7 @@ When you update those observable data structures, Knockout updates the DOM autom
 ---
 
 
-## Angular JS
+## AngularJS
 
 --
 
@@ -149,12 +149,12 @@ When you update those observable data structures, Knockout updates the DOM autom
 
 --
 
-Angular needs you to change your data during specific windows of time:
+AngularJS needs you to change your data during specific windows of time:
 
 * either during an Angular-generated callback
 * or by calling `scope.$apply`
 
-After your code changes the data, Angular checks all of the data against a saved copy of the previous version. If it finds any differences, it automatically updates the corresponding DOM nodes.
+After your code changes the data, AngularJS checks all of the data against a saved copy of the previous version. If it finds any differences, it automatically updates the corresponding DOM nodes.
 
 **Diff: state data is automatically diffed**
 
@@ -401,11 +401,11 @@ https://jsfiddle.net/reactjs/69z2wepo/
 
 ---
 
-## vs. Angular
+## vs. AngularJS
 
 * Dirty-checking doesn't scale
 * JSX is better than HTML templates
-* In Angular it's hard to control the sequence of events in your program. You have do tricks like `setTimeout(..., 0)` to get code to run after the UI has been updated.
+* In AngularJS it's hard to control the sequence of events in your program. You have do tricks like `setTimeout(..., 0)` to get code to run after the UI has been updated.
 
 ---
 
