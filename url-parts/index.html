@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>URL Parts</title>
+
+  <style>
+    html {
+      font-family: monospace;
+      font-size: 1.6em;
+    }
+
+    h1 {
+      white-space: pre;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 0.4em;
+      border: 1px solid #e0e0e0;
+    }
+
+    th {
+      text-align: left;
+      padding-right: 2em;
+    }
+  </style>
+  
+  <script>
+    function escapeHtml(str) {
+      const elem = document.createElement("div"); // "div" is arbitrary, could be any element name
+      elem.innerText = str;
+      return elem.innerHTML;
+    }
+  </script>
+</head>
+
+<body>
+  <h1><script>document.write(escapeHtml(window.location.href))</script></h1>
+
+  <h2>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/URL">URL</a>
+  </h2>
+  <table>
+    <script>
+      const url = new URL(window.location.href);
+
+      for (const propertyName of "hash host hostname href origin password pathname port protocol search username".split(" ")) {
+        document.write(`<tr><th>${propertyName}</th><td>${escapeHtml(url[propertyName])}</td></tr>`);
+      }
+    </script>
+  </table>
+
+  <h2>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams">URLSearchParams</a>
+  </h2>
+  <table>
+    <script>
+      for (const [key, value] of url.searchParams.entries()) {
+        document.write(`<tr><th>${escapeHtml(key)}</th><td>${escapeHtml(value)}</td></tr>`);
+      }
+    </script>
+  </table>
+</body>
+
+</html>
