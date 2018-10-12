@@ -1,13 +1,13 @@
-var propertyNames = "hash host hostname href origin pathname port protocol search".split(
-  " "
-);
+var propertyNames = "hash host hostname href origin pathname port protocol search".split(" ");
 
 const urlInput = document.getElementById("url-input");
-urlInput.value = window.location.href;
-urlInput.addEventListener("input", update);
-
+const urlFields = document.getElementById("url-fields");
+const urlParams = document.getElementById("url-params");
 const errorDiv = document.getElementById("error");
 const resultsDiv = document.getElementById("results");
+
+urlInput.value = window.location.href;
+urlInput.addEventListener("input", update);
 
 function escapeHtml(str) {
   const elem = document.createElement("div"); // "div" is arbitrary, could be any element name
@@ -20,26 +20,19 @@ function update() {
     const url = new URL(urlInput.value);
 
     let html = "<table>";
-
     for (const propertyName of propertyNames) {
-      html += `<tr><th>${propertyName}</th><td>${escapeHtml(
-        url[propertyName]
-      )}</td></tr>`;
+      html += `<tr><th>${propertyName}</th><td>${escapeHtml(url[propertyName])}</td></tr>`;
     }
     html += "</table>";
-
-    document.getElementById("url-fields").innerHTML = html;
+    urlFields.innerHTML = html;
 
     html = "<table>";
-
     for (const [key, value] of url.searchParams.entries()) {
-      html += `<tr><th>${escapeHtml(key)}</th><td>${escapeHtml(
-        value
-      )}</td></tr>`;
+      html += `<tr><th>${escapeHtml(key)}</th><td>${escapeHtml(value)}</td></tr>`;
     }
     html += "</table>";
+    urlParams.innerHTML = html;
 
-    document.getElementById("url-params").innerHTML = html;
     errorDiv.innerHTML = "";
     resultsDiv.style.display = "initial";
   } catch (e) {
