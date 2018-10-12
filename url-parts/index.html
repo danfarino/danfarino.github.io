@@ -10,6 +10,10 @@
       font-size: 1.6em;
     }
 
+    body {
+      padding: 0.5em;
+    }
+
     h1 {
       white-space: pre;
     }
@@ -27,43 +31,45 @@
       text-align: left;
       padding-right: 2em;
     }
-  </style>
-  
-  <script>
-    function escapeHtml(str) {
-      const elem = document.createElement("div"); // "div" is arbitrary, could be any element name
-      elem.innerText = str;
-      return elem.innerHTML;
+
+    #url {
+      display: grid;
     }
-  </script>
+
+    #url-input {
+      border: 3px solid #ccc;
+      padding: 0.3em;
+      font-size: inherit;
+    }
+    
+    #error {
+      margin-top: 1em;
+      font-size: 1.2em;
+      color: red;
+    }
+  </style>
 </head>
 
 <body>
-  <h1><script>document.write(escapeHtml(window.location.href))</script></h1>
+  <div id='url'>
+    <input type='text' id='url-input' spellcheck="false" autofocus/>
+  </div>
 
-  <h2>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/API/URL">URL</a>
-  </h2>
-  <table>
-    <script>
-      const url = new URL(window.location.href);
+  <div id='error'></div>
 
-      for (const propertyName of "hash host hostname href origin password pathname port protocol search username".split(" ")) {
-        document.write(`<tr><th>${propertyName}</th><td>${escapeHtml(url[propertyName])}</td></tr>`);
-      }
-    </script>
-  </table>
+  <div id='results'>
+    <h2>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/URL">URL</a>
+    </h2>
+    <div id='url-fields'></div>
 
-  <h2>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams">URLSearchParams</a>
-  </h2>
-  <table>
-    <script>
-      for (const [key, value] of url.searchParams.entries()) {
-        document.write(`<tr><th>${escapeHtml(key)}</th><td>${escapeHtml(value)}</td></tr>`);
-      }
-    </script>
-  </table>
+    <h2>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams">URLSearchParams</a>
+    </h2>
+    <div id='url-params'></div>
+  </div>
+
+  <script src='index.js'></script>
 </body>
 
 </html>
