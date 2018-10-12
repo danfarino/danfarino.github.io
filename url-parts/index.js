@@ -1,4 +1,4 @@
-var propertyNames = "hash host hostname href origin pathname port protocol search".split(" ");
+var propertyNames = "href origin protocol host hostname port pathname search hash".split(" ");
 
 const urlInput = document.getElementById("url-input");
 const urlFields = document.getElementById("url-fields");
